@@ -1,6 +1,7 @@
 use axum::http::StatusCode;
-use openleadr_client::{Error, Filter, PaginationOptions, VirtualEndNode};
+use openleadr_client::{BusinessLogic, Error, Filter, PaginationOptions, VirtualEndNode};
 use openleadr_wire::{program::ProgramRequest, target::Target};
+use serial_test::serial;
 use sqlx::PgPool;
 use std::str::FromStr;
 
@@ -17,12 +18,43 @@ fn default_content() -> ProgramRequest {
     }
 }
 
-#[sqlx::test(fixtures("users"))]
-async fn get(db: PgPool) {
-    let client = common::setup_client::<VirtualEndNode>(db).await;
-    let program_client = client.create_program(default_content()).await.unwrap();
+#[tokio::test]
+#[serial]
+async fn program_crud() {
+    let ctx = common::setup::<BusinessLogic>(common::AuthRole::Bl).await;
+    let original_name = "program-crud-test";
+    let updated_name = "program-crud-test-updated";
 
-    assert_eq!(program_client.content(), &default_content());
+    if let Ok(programs) = ctx.get_program_list(Filter::none()).await {
+        for program in programs {
+            if [original_name, updated_name].contains(&program.content().program_name.as_str()) {
+                program.delete().await.unwrap();
+            }
+        }
+    }
+
+    let content = ProgramRequest {
+        program_name: original_name.to_string(),
+        ..default_content()
+    };
+    let created = ctx.create_program(content.clone()).await.unwrap();
+    assert_eq!(created.content(), &content);
+
+    let err = ctx.create_program(content).await.unwrap_err();
+    assert!(err.is_conflict());
+
+    let mut program = ctx.get_program_by_id(created.id()).await.unwrap();
+    assert_eq!(program.content(), created.content());
+
+    program.content_mut().program_name = updated_name.to_string();
+    program.update().await.unwrap();
+    let updated = ctx.get_program_by_id(program.id()).await.unwrap();
+    assert_eq!(updated.content().program_name, updated_name);
+
+    let id = program.id().clone();
+    program.delete().await.unwrap();
+    let err = ctx.get_program_by_id(&id).await.unwrap_err();
+    assert!(err.is_not_found());
 }
 
 #[sqlx::test(fixtures("users"))]
