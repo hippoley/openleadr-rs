@@ -1,0 +1,52 @@
+name: WEBHOOK conformance evidence
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - evidence/webhook-conformance-rerun
+
+permissions:
+  contents: read
+
+jobs:
+  rerun-independent-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout patched OpenLEADR
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Build patched VTN image
+        run: docker build -f vtn.Dockerfile -t openleadr-webhook-fix:local .
+
+      - name: Checkout independent conformance suite
+        uses: actions/checkout@v7
+        with:
+          repository: hupe1980/openadr
+          ref: fd57b1d1915394cdd7024b6406fa14ee85841bc4
+          path: independent-openadr
+          persist-credentials: false
+
+      - name: Run independent OpenADR conformance harness
+        working-directory: independent-openadr
+        env:
+          OPENADR_PEER_IMAGE: openleadr-webhook-fix:local
+          OPENADR_INTEROP_JSON: ../openleadr-webhook-conformance.json
+        run: cargo test --all-features --test interop -- --ignored --nocapture
+
+      - name: Extract WEBHOOK check
+        if: always()
+        run: |
+          if [ -f openleadr-webhook-conformance.json ]; then
+            jq '.findings[]? | select(.id == "notifiers-webhook-key" or .check.id == "notifiers-webhook-key")'               openleadr-webhook-conformance.json || true
+          fi
+
+      - name: Upload conformance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openleadr-webhook-conformance
+          path: openleadr-webhook-conformance.json
+          if-no-files-found: warn
