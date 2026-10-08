@@ -200,3 +200,35 @@ implementation-neutral oracle -> protocol-specific conformance probe`.
 - [ ] Obtain independent reviewer feedback and link the upstream PR
 
 Do not commit credentials or tokens to the repository.
+
+
+#### Conformance-readiness gate: do not compile unresolved semantics
+
+The Gateway API conflict case is intentionally blocked before native test generation.
+The implementation-independent invariant is narrower than the protocol-specific
+status vocabulary: a deterministic losing HTTPRoute must not remain
+machine-indistinguishable from the winner after status convergence and dataplane
+verification, but Gateway API maintainers have not yet standardized whether that
+distinction belongs in `Accepted`, `Programmed`, or both.
+
+This is a real conformance-readiness boundary, not a generator limitation. A
+normative test must not silently choose protocol semantics that the protocol
+community has not chosen.
+
+Gateway API issue #5103 provides a useful process precedent: the contributor first
+raised a mismatch between a conformance test precondition and the capability that
+reports could express; after maintainer feedback clarified the intended semantics,
+the implementation proposal narrowed and moved to PR #5340. The reusable sequence is:
+
+```text
+observed gap
+  -> stable implementation-independent invariant
+  -> explicit blocking protocol decision
+  -> maintainer/spec decision
+  -> native conformance test
+  -> report-visible obligation
+```
+
+For #4303, an upstream comment proposing the minimal decision boundary was attempted
+from this workstream but GitHub integration returned HTTP 403. No upstream comment
+or contribution is claimed from that attempt.
