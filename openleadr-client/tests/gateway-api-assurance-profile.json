@@ -59,7 +59,27 @@
           "supports_candidate": "Accepted remains semantic-validity evidence while Programmed carries dataplane/programming outcome.",
           "does_not_establish": "Gateway API normative consensus for HTTPRoute conflict status."
         }
-      ]
+      ],
+      "adoption_target": {
+        "repository": "kubernetes-sigs/gateway-api",
+        "issue": "4303",
+        "integration_point": "native conformance test for the exact deterministic-conflict subset",
+        "native_harness_evidence": [
+          "conformance/tests/httproute-matching.go uses ConformanceTest, GatewayAndHTTPRoutesMustBeAccepted, condition helpers, and live HTTP probes",
+          "conformance/tests/httproute-exact-path-matching.go demonstrates exact-path traffic assertions",
+          "conformance/tests/httproute-observed-generation-bump.go demonstrates current observedGeneration assertions"
+        ],
+        "proposed_contract": [
+          "create two conflict-equivalent HTTPRoutes whose precedence is deterministic",
+          "wait for current observedGeneration on both routes",
+          "assert the winner is accepted",
+          "assert the deterministic loser has the normative non-success condition once #4303 settles its vocabulary",
+          "probe traffic and verify only the winner backend is effective",
+          "delete the winner and verify the former loser can become effective"
+        ],
+        "scope_boundary": "Exclude partial rule/header/query conflicts; they have harder merge semantics and are not required to prove the exact-conflict gap.",
+        "externalization_status": "blocked-by-github-integration-403"
+      }
     },
     {
       "id": "rejected-but-effective",
