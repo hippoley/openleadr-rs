@@ -1,0 +1,41 @@
+{
+  "schema_version": "0.3.0",
+  "source_commit": "0000000000000000000000000000000000000000",
+  "vtn": {
+    "implementation": "REPLACE_WITH_VTN_IMPLEMENTATION",
+    "version": "REPLACE_WITH_VTN_VERSION",
+    "deployment": "independent"
+  },
+  "runner": {
+    "rust_version": "REPLACE_WITH_RUST_VERSION",
+    "os": "REPLACE_WITH_RUNNER_OS",
+    "ci_run_url": null
+  },
+  "tests": [
+    {
+      "name": "program_crud",
+      "command": "cargo test -p openleadr-client --test program program_crud -- --exact --nocapture",
+      "exit_code": -1,
+      "log_sha256": null
+    }
+  ],
+  "cleanup": {
+    "verified": false,
+    "remaining_resources": 0,
+    "notes": "Template only. Set verified=true only after checking the target VTN."
+  },
+  "claim": "execution-only",
+  "effect_verification": [
+    {
+      "operation": "program.create",
+      "resource_type": "program",
+      "resource_id": "REPLACE_WITH_RESOURCE_ID",
+      "observation": "read-after-write",
+      "verified": false,
+      "verdict": "inconclusive",
+      "before_sha256": null,
+      "after_sha256": null,
+      "notes": "Template intentionally starts inconclusive. Never convert to an independent-vtn-crud claim without a matched external observation and verified zero-resource cleanup."
+    }
+  ]
+}
