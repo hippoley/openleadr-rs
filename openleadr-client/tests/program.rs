@@ -22,19 +22,13 @@ fn default_content() -> ProgramRequest {
 #[serial]
 async fn program_crud() {
     let ctx = common::setup::<BusinessLogic>(common::AuthRole::Bl).await;
-    let original_name = "program-crud-test";
-    let updated_name = "program-crud-test-updated";
-
-    if let Ok(programs) = ctx.get_program_list(Filter::none()).await {
-        for program in programs {
-            if [original_name, updated_name].contains(&program.content().program_name.as_str()) {
-                program.delete().await.unwrap();
-            }
-        }
-    }
+    // Unique names prevent test runs from deleting another runner's resources.
+    let run_id = uuid::Uuid::new_v4();
+    let original_name = format!("program-crud-test-{run_id}");
+    let updated_name = format!("program-crud-test-updated-{run_id}");
 
     let content = ProgramRequest {
-        program_name: original_name.to_string(),
+        program_name: original_name.clone(),
         ..default_content()
     };
     let created = ctx.create_program(content.clone()).await.unwrap();
@@ -46,7 +40,7 @@ async fn program_crud() {
     let mut program = ctx.get_program_by_id(created.id()).await.unwrap();
     assert_eq!(program.content(), created.content());
 
-    program.content_mut().program_name = updated_name.to_string();
+    program.content_mut().program_name = updated_name.clone();
     program.update().await.unwrap();
     let updated = ctx.get_program_by_id(program.id()).await.unwrap();
     assert_eq!(updated.content().program_name, updated_name);
