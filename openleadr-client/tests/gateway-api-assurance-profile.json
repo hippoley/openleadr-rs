@@ -50,7 +50,16 @@
       "protocol_decision_left_open": "The oracle does not prescribe whether the losing state is Accepted=False, Programmed=False, or another standardized conflict condition.",
       "conformance_readiness": "spec-decision-required",
       "blocking_decision": "Gateway API must standardize which Route status condition/reason distinguishes the deterministic loser before a normative conformance test can assert that vocabulary.",
-      "ready_invariant": "The deterministic loser must not remain indistinguishable from the winner as successfully effective for the same parent after status convergence and dataplane verification."
+      "ready_invariant": "The deterministic loser must not remain indistinguishable from the winner as successfully effective for the same parent after status convergence and dataplane verification.",
+      "implementation_evidence": [
+        {
+          "implementation": "kgateway",
+          "evidence_type": "non-normative-status-semantics",
+          "observation": "A current kgateway release moves Route conflicts, dropped routes, and replaced routes to kgateway.dev/Programmed while keeping Accepted scoped to semantic validity.",
+          "supports_candidate": "Accepted remains semantic-validity evidence while Programmed carries dataplane/programming outcome.",
+          "does_not_establish": "Gateway API normative consensus for HTTPRoute conflict status."
+        }
+      ]
     }
   ],
   "applicability": {
