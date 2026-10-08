@@ -56,8 +56,12 @@ def validate(path: Path) -> list[str]:
             continue
         if not oracle.get("id"):
             errors.append(f"{path}: negative_oracles[{i}].id is required")
-        if not any(k in oracle for k in ("must_not_claim", "must_reject")):
-            errors.append(f"{path}: negative_oracles[{i}] needs must_not_claim or must_reject")
+        boundaries = [oracle.get(k) for k in ("must_not_claim", "must_reject") if k in oracle]
+        if not boundaries or not any(isinstance(b, list) and b and all(isinstance(x, str) and x.strip() for x in b) for b in boundaries):
+            errors.append(f"{path}: negative_oracles[{i}] needs non-empty must_not_claim or must_reject list")
+        for key in ("must_not_claim", "must_reject"):
+            if key in oracle and (not isinstance(oracle[key], list) or not oracle[key] or not all(isinstance(x, str) and x.strip() for x in oracle[key])):
+                errors.append(f"{path}: negative_oracles[{i}].{key} must be a non-empty list of strings")
         readiness = oracle.get("conformance_readiness", "ready")
         if app.get("profile") == "mixed-scope-not-reportable" and readiness == "ready":
             errors.append(f"{path}: negative_oracles[{i}] mixed-scope profile cannot declare ready normative conformance")
