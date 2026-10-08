@@ -23,6 +23,14 @@ export OPENLEADR_RS_VEN_CLIENT_SECRET='<ven-client-secret>'
 
 `OPENADR_VTN_URL` is a compatibility alias used only when `OPENLEADR_RS_VTN_URL` is absent. `OPENLEADR_RS_CLIENT_ID` and `OPENLEADR_RS_CLIENT_SECRET` remain compatibility fallbacks when role-specific credentials are absent. An unset credential may use an in-tree test default, which is unlikely to work against a third-party VTN; supply explicit credentials for external tests.
 
+## External-only guard (fail closed)
+
+Set `OPENLEADR_RS_REQUIRE_EXTERNAL_VTN=1` before the focused tests. This prevents the `common::setup` helper from silently using its in-tree PostgreSQL/router fallback when neither external VTN URL variable is set. It does **not** establish that the supplied URL belongs to a third-party implementation: record and independently verify the deployment identity and version. A URL pointing to the in-tree VTN remains an in-tree run.
+
+```sh
+export OPENLEADR_RS_REQUIRE_EXTERNAL_VTN=1
+```
+
 ## Run the focused black-box tests
 
 ```sh
