@@ -22,6 +22,15 @@ class FailClosedStructureTests(unittest.TestCase):
     def test_unknown_readiness_rejected(self):
         self.check_invalid({"applicability": {}, "negative_oracles": [{"id": "x", "must_reject": ["x"], "conformance_readiness": "invented"}]}, "unknown conformance_readiness")
 
+    def test_empty_rejection_list_rejected(self):
+        self.check_invalid({"applicability": {}, "negative_oracles": [{"id": "x", "must_reject": []}]}, "must_reject must be a non-empty list of strings")
+
+    def test_blank_rejection_string_rejected(self):
+        self.check_invalid({"applicability": {}, "negative_oracles": [{"id": "x", "must_not_claim": ["  "]}]}, "must_not_claim must be a non-empty list of strings")
+
+    def test_wrong_rejection_type_rejected(self):
+        self.check_invalid({"applicability": {}, "negative_oracles": [{"id": "x", "must_reject": "reject"}]}, "must_reject must be a non-empty list of strings")
+
     def test_non_object_root(self):
         self.check_invalid([], "profile root must be an object")
 
