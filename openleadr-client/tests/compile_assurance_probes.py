@@ -11,8 +11,13 @@ import json
 import sys
 from pathlib import Path
 
+from validate_assurance_profiles import ALLOWED_READINESS, validate
+
 
 def compile_profile(path: Path) -> dict:
+    errors = validate(path)
+    if errors:
+        raise ValueError("; ".join(errors))
     data = json.loads(path.read_text())
     app = data["applicability"]
     probes = []
@@ -23,6 +28,8 @@ def compile_profile(path: Path) -> dict:
 
     for oracle in data["negative_oracles"]:
         readiness = oracle.get("conformance_readiness", "ready")
+        if readiness not in ALLOWED_READINESS:
+            raise ValueError(f"{oracle.get('id', '<unknown>')}: unknown conformance_readiness {readiness!r}")
         if readiness != "ready":
             probes.append(
                 {
