@@ -18,6 +18,19 @@ def compile_profile(path: Path) -> dict:
     probes = []
 
     for oracle in data["negative_oracles"]:
+        readiness = oracle.get("conformance_readiness", "ready")
+        if readiness != "ready":
+            probes.append(
+                {
+                    "oracle_id": oracle["id"],
+                    "status": "blocked",
+                    "conformance_readiness": readiness,
+                    "blocking_decision": oracle.get("blocking_decision"),
+                    "ready_invariant": oracle.get("ready_invariant"),
+                }
+            )
+            continue
+
         reject = oracle.get("must_reject") or oracle.get("must_not_claim")
         if not reject:
             raise ValueError(f"{oracle.get('id', '<unknown>')}: oracle has no rejection boundary")
