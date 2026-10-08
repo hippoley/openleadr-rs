@@ -42,7 +42,7 @@ It would **not** prove full OpenADR compliance, VEN role authorization, all reso
 
 ## Known limitations before upstream submission
 
-1. The CRUD tests use fixed resource names and pre-delete matching names. This can interfere with another test runner using the same VTN. Use a dedicated environment.
+1. The focused Program and Event CRUD tests now use per-run UUID-based names and do not pre-delete similarly named resources. This reduces name collisions, but does not guarantee isolation from other test runners or resource cleanup after failures. Use a dedicated environment.
 2. Cleanup occurs on the normal success path; an assertion failure or panic can leave test resources behind. A cleanup-on-failure design is still required.
 3. Existing SQLx-backed integration tests are not all converted to remote-only tests. Run the focused commands above; a full `cargo test` may still require PostgreSQL.
 4. No real third-party VTN run, CI result, or maintainer acceptance is asserted by this document. Record the VTN implementation/version, runner commit SHA, redacted configuration, command, exit code, and cleanup result before claiming independent reproducibility.
