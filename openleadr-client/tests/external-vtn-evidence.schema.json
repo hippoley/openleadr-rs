@@ -310,6 +310,19 @@
               "verified",
               "remaining_resources"
             ]
+          },
+          "tests": {
+            "minItems": 1,
+            "items": {
+              "properties": {
+                "exit_code": {
+                  "const": 0
+                }
+              },
+              "required": [
+                "exit_code"
+              ]
+            }
           }
         }
       }
