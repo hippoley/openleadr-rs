@@ -10,6 +10,7 @@ use std::{env::VarError, ops::Deref, sync::Arc};
 use tower::{Service, ServiceExt};
 use url::Url;
 
+#[derive(Clone, Copy)]
 #[allow(dead_code)]
 pub enum AuthRole {
     Bl,
