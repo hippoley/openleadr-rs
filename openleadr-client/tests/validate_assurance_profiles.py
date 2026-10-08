@@ -7,6 +7,7 @@ from pathlib import Path
 
 REQUIRED_TOP = {"profile_version", "purpose", "protocol", "applicability", "evidence_surface", "negative_oracles"}
 REQUIRED_EVIDENCE = {"id", "observation", "supports", "does_not_establish"}
+ALLOWED_READINESS = {"ready", "spec-decision-required", "implementation-regression-only"}
 
 
 def validate(path: Path) -> list[str]:
@@ -39,6 +40,8 @@ def validate(path: Path) -> list[str]:
         if not any(k in oracle for k in ("must_not_claim", "must_reject")):
             errors.append(f"{path}: negative_oracles[{i}] needs must_not_claim or must_reject")
         readiness = oracle.get("conformance_readiness", "ready")
+        if readiness not in ALLOWED_READINESS:
+            errors.append(f"{path}: negative_oracles[{i}] has unknown conformance_readiness {readiness!r}")
         if readiness != "ready":
             if not oracle.get("blocking_decision"):
                 errors.append(f"{path}: negative_oracles[{i}] blocked oracle needs blocking_decision")
