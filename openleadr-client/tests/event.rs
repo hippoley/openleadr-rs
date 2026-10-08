@@ -37,15 +37,9 @@ fn default_content(program_id: &ProgramId) -> EventRequest {
 #[serial]
 async fn event_crud() {
     let ctx = common::setup::<BusinessLogic>(common::AuthRole::Bl).await;
-    let program_name = "event-crud-program";
-
-    if let Ok(programs) = ctx.get_program_list(Filter::none()).await {
-        for program in programs {
-            if program.content().program_name == program_name {
-                program.delete().await.unwrap();
-            }
-        }
-    }
+    // Avoid touching resources created by another test run on a shared VTN.
+    let run_id = uuid::Uuid::new_v4();
+    let program_name = format!("event-crud-program-{run_id}");
 
     let program = ctx
         .create_program(ProgramRequest::new(program_name))
@@ -53,7 +47,7 @@ async fn event_crud() {
         .unwrap();
 
     let event_content = EventRequest {
-        event_name: Some("event-crud-test".to_string()),
+        event_name: Some(format!("event-crud-test-{run_id}")),
         ..default_content(program.id())
     };
     let created = program.create_event(event_content.clone()).await.unwrap();
