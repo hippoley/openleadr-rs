@@ -10,7 +10,7 @@ Upstream target:
 
 Bounded scope:
 - exact conflict only;
-- deterministic precedence only;
+- deterministic precedence only; derive the expected winner from actual creationTimestamp, then namespace/name on timestamp ties;
 - no partial header/query/rule conflict semantics;
 - live dataplane assertion for the winner;
 - final upstream test should also delete the winner and prove the former loser becomes effective.
