@@ -144,5 +144,34 @@
       "deterministic route conflict"
     ],
     "report_visibility_requirement": "The generated probe must belong to a declared conformance profile/feature so its result is not invisible to reports."
-  }
+  },
+  "adoption_gate": {
+    "metric": "external-oracle-adoption",
+    "current_value": 0,
+    "counts_as_adoption": [
+      "an external project incorporates the oracle as a regression test",
+      "an external architecture/design adopts the oracle as an explicit invariant",
+      "a standards or conformance suite incorporates the oracle as a required check"
+    ],
+    "does_not_count": [
+      "a similar bug exists",
+      "an implementation independently exhibits the contradiction",
+      "a local profile or compiler encodes the oracle",
+      "an upstream comment was attempted but not posted"
+    ]
+  },
+  "external_convergence": [
+    {
+      "source": "cilium/cilium#46917",
+      "type": "consumer-impact",
+      "observation": "A downstream user reported that status said Accepted=False while the datapath still worked; a Gateway controller gated on the status, causing Helm upgrade timeout and rollback.",
+      "implication": "Status/effect contradictions can cause other automation to make incorrect operational decisions."
+    },
+    {
+      "source": "cilium/cilium#46681",
+      "type": "architecture-convergence",
+      "observation": "Cilium's Graph-Driven Validation proposal identifies duplicated validation and translation logic as a source of drift where a route can be rejected in status but still ingested into the data plane; it proposes one validation graph whose pruned copy drives translation.",
+      "implication": "The implementation community is independently addressing the same consistency property at architecture level, not only as isolated bug fixes."
+    }
+  ]
 }
