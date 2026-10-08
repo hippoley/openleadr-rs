@@ -59,6 +59,8 @@ def validate(path: Path) -> list[str]:
         if not any(k in oracle for k in ("must_not_claim", "must_reject")):
             errors.append(f"{path}: negative_oracles[{i}] needs must_not_claim or must_reject")
         readiness = oracle.get("conformance_readiness", "ready")
+        if app.get("profile") == "mixed-scope-not-reportable" and readiness == "ready":
+            errors.append(f"{path}: negative_oracles[{i}] mixed-scope profile cannot declare ready normative conformance")
         if readiness not in ALLOWED_READINESS:
             errors.append(f"{path}: negative_oracles[{i}] has unknown conformance_readiness {readiness!r}")
         if readiness != "ready":
