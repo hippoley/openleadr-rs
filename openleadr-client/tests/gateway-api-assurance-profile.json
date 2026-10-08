@@ -75,7 +75,7 @@
         "status-only conformance success when the dataplane still serves traffic for the rejected listener"
       ],
       "reason": "A controller-reported rejection/programming state is not sufficient evidence of dataplane effect when the implementation can still program and serve the rejected configuration.",
-      "conformance_readiness": "ready",
+      "conformance_readiness": "implementation-regression-only",
       "implementation_evidence": [
         {
           "implementation": "Cilium",
@@ -96,7 +96,9 @@
           "fail if a rejected listener remains externally effective"
         ],
         "externalization_status": "blocked-by-github-integration-403"
-      }
+      },
+      "blocking_decision": "This implementation-specific witness has not been mapped to a normative Gateway API conformance profile and feature set; do not generate a normative conformance test.",
+      "ready_invariant": "A listener rejected for protocol conflict must not remain effective in the dataplane after convergence."
     },
     {
       "id": "programmed-but-ineffective",
@@ -112,7 +114,7 @@
         "status-only success when the dataplane rejected the listener configuration or the listener remains unreachable"
       ],
       "reason": "Controller-reported Programmed=True is not sufficient evidence of dataplane effect when Envoy can NACK the generated listener.",
-      "conformance_readiness": "ready",
+      "conformance_readiness": "implementation-regression-only",
       "implementation_evidence": [
         {
           "implementation": "kgateway",
@@ -133,17 +135,19 @@
           "fail if the listener remains unreachable or only stale last-known-good behavior is effective"
         ],
         "externalization_status": "not-yet-attempted"
-      }
+      },
+      "blocking_decision": "This implementation-specific witness has not been mapped to a normative Gateway API conformance profile and feature set; do not generate a normative conformance test.",
+      "ready_invariant": "A listener claimed successfully programmed must not silently remain absent after Envoy rejects its configuration; implementation-specific extension semantics must be respected."
     }
   ],
   "applicability": {
     "conformance_system": "Kubernetes Gateway API",
-    "profile": "GATEWAY-HTTP",
+    "profile": "mixed-scope-not-reportable",
     "feature_scope": [
-      "HTTPRoute",
-      "deterministic route conflict"
+      "HTTPRoute deterministic precedence conflict (normative status semantics unresolved)",
+      "Gateway listener status versus effective dataplane behavior (implementation regression candidates; TLSRoute applicability requires separate profile mapping)"
     ],
-    "report_visibility_requirement": "The generated probe must belong to a declared conformance profile/feature so its result is not invisible to reports."
+    "report_visibility_requirement": "Do not publish this mixed-scope research profile as GATEWAY-HTTP conformance. Resolve each oracle to its own declared Gateway API profile and features, and verify report visibility, before normative generation."
   },
   "adoption_gate": {
     "metric": "external-oracle-adoption",
