@@ -27,7 +27,7 @@ def compile_profile(path: Path) -> dict:
             probes.append(
                 {
                     "oracle_id": oracle["id"],
-                    "status": "blocked",
+                    "status": "blocked" if readiness == "spec-decision-required" else "implementation-regression-only",
                     "conformance_readiness": readiness,
                     "blocking_decision": oracle.get("blocking_decision"),
                     "ready_invariant": oracle.get("ready_invariant"),
