@@ -38,6 +38,12 @@ def validate(path: Path) -> list[str]:
             errors.append(f"{path}: negative_oracles[{i}].id is required")
         if not any(k in oracle for k in ("must_not_claim", "must_reject")):
             errors.append(f"{path}: negative_oracles[{i}] needs must_not_claim or must_reject")
+        readiness = oracle.get("conformance_readiness", "ready")
+        if readiness != "ready":
+            if not oracle.get("blocking_decision"):
+                errors.append(f"{path}: negative_oracles[{i}] blocked oracle needs blocking_decision")
+            if not oracle.get("ready_invariant"):
+                errors.append(f"{path}: negative_oracles[{i}] blocked oracle needs ready_invariant")
 
     return errors
 
