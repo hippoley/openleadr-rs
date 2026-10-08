@@ -1,5 +1,6 @@
 # Transplant draft for kubernetes-sigs/gateway-api#4303.
-# Creation order makes exact-conflict-a older and therefore the deterministic winner.
+# The final upstream test must determine the winner from actual creationTimestamp;
+# namespace/name is only the normative tie-break if timestamps are equal.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
