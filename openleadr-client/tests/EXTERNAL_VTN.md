@@ -90,6 +90,18 @@ This is an auditability rule, not a claim of general causal identification. Prot
 that expose stronger mutation/correlation identifiers can record them as additional
 evidence; protocols that do not must not manufacture attribution from timing alone.
 
+### Reusable negative conformance case
+
+A verifier can reuse the following invariant without adopting this repository's schema:
+
+- given a matching post-action external observation,
+- when no pre-action observation was captured and no target-system operation correlation exists,
+- then the effect may be reported as observed, but attribution remains unestablished,
+- and the verifier must reject promotion to an interoperability-level claim.
+
+This is the `matched-but-unattributed` case. Its value is the negative boundary: a
+verifier that promotes this case is overclaiming what its evidence establishes.
+
 ## Evidence checklist
 
 - [ ] `cargo fmt --check` and `cargo check -p openleadr-client --tests` pass
