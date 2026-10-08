@@ -60,6 +60,31 @@
           "does_not_establish": "Gateway API normative consensus for HTTPRoute conflict status."
         }
       ]
+    },
+    {
+      "id": "rejected-but-effective",
+      "source": "cilium/cilium#46917",
+      "given": [
+        "protocol status reports the affected listener as Accepted=False",
+        "protocol status reports the affected listener as Programmed=False"
+      ],
+      "must_observe": [
+        "dataplane probe confirms the rejected listener is not actually serving traffic"
+      ],
+      "must_reject": [
+        "status-only conformance success when the dataplane still serves traffic for the rejected listener"
+      ],
+      "reason": "A controller-reported rejection/programming state is not sufficient evidence of dataplane effect when the implementation can still program and serve the rejected configuration.",
+      "conformance_readiness": "ready",
+      "implementation_evidence": [
+        {
+          "implementation": "Cilium",
+          "evidence_type": "status-effect-contradiction",
+          "observation": "Cilium issue #46917 reports ProtocolConflict listeners marked Accepted=False and Programmed=False while Envoy is still programmed and serves traffic on the conflicted port.",
+          "supports_candidate": "Conformance checks for externally effective routing/listener behavior may require status plus dataplane observation rather than status alone.",
+          "does_not_establish": "That every Gateway API status condition requires a dataplane probe, or that the reported Cilium behavior is normative."
+        }
+      ]
     }
   ],
   "applicability": {
