@@ -10,28 +10,54 @@
       "id": "api-response",
       "observation": "successful POST/PUT/DELETE response",
       "supports": "request-accepted",
-      "does_not_establish": ["persistent-effect", "action-attribution"]
+      "does_not_establish": [
+        "persistent-effect",
+        "action-attribution"
+      ]
     },
     {
       "id": "read-after-write",
       "observation": "subsequent read matches expected fields",
       "supports": "post-state-observed",
-      "does_not_establish": ["pre-state-differed", "action-attribution"]
+      "does_not_establish": [
+        "pre-state-differed",
+        "action-attribution"
+      ]
     },
     {
       "id": "pre-post-delta",
       "observation": "pre-action and post-action reads differ as expected",
       "supports": "state-delta-observed",
-      "does_not_establish": ["exclusive-writer", "action-attribution"]
+      "does_not_establish": [
+        "exclusive-writer",
+        "action-attribution"
+      ]
     }
   ],
   "negative_oracles": [
     {
       "id": "matched-but-unattributed",
-      "given": ["post-state-observed"],
-      "missing": ["pre-action-observation", "operation-correlation"],
-      "must_not_claim": ["action-attribution", "interoperability-candidate"],
+      "given": [
+        "post-state-observed"
+      ],
+      "missing": [
+        "pre-action-observation",
+        "operation-correlation"
+      ],
+      "must_not_claim": [
+        "action-attribution",
+        "interoperability-candidate"
+      ],
       "reason": "A matching post-state can pre-exist or be produced by another actor."
     }
-  ]
+  ],
+  "applicability": {
+    "conformance_system": "OpenADR external VTN black-box testing",
+    "feature_scope": [
+      "Program",
+      "Event",
+      "state-changing client operations"
+    ],
+    "report_visibility_requirement": "Bind each probe to the exact VTN implementation/version and tested OpenADR surface."
+  }
 }
