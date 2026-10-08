@@ -165,6 +165,32 @@ first boundary the protocol cannot independently bridge. A second protocol produ
 different ladder is evidence that this is a profiling method rather than an OpenADR-only
 taxonomy.
 
+### From assurance boundary to conformance oracle
+
+Gateway API issue #4303 provides a useful pressure test for turning a boundary into a
+conformance obligation. Multiple implementations can accept two conflicting HTTPRoutes
+while only one is effective in the dataplane. For the deliberately narrow case where two
+routes are identical at the conflict-relevant surface and protocol precedence selects a
+deterministic single winner, a useful implementation-neutral oracle is:
+
+1. create both routes against the same listener;
+2. wait until status has converged for their current generations;
+3. verify traffic resolves only to the precedence winner;
+4. require the losing route to expose at least one machine-detectable non-success state
+   for that parent; and
+5. reject the result if both routes remain indistinguishable as successful while only
+   one can ever receive traffic.
+
+The oracle intentionally does not choose between `Accepted=False` and
+`Programmed=False`; that is a protocol-semantics decision for Gateway API. The reusable
+infrastructure step is earlier: derive a negative oracle from an observed assurance gap,
+then let the protocol define the exact status vocabulary that satisfies it.
+
+This suggests a minimal pipeline worth validating before creating a standalone project:
+
+`protocol evidence surface -> unsupported stronger claim -> minimal counterexample ->
+implementation-neutral oracle -> protocol-specific conformance probe`.
+
 ## Evidence checklist
 
 - [ ] `cargo fmt --check` and `cargo check -p openleadr-client --tests` pass
