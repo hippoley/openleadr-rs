@@ -1,0 +1,46 @@
+{
+  "profile_version": "0.1.0",
+  "purpose": "Describe protocol-native evidence boundaries and derive implementation-neutral negative conformance oracles.",
+  "protocol": {
+    "name": "Kubernetes Gateway API",
+    "surface": "HTTPRoute status and dataplane behavior"
+  },
+  "evidence_surface": [
+    {
+      "id": "accepted-condition",
+      "observation": "HTTPRoute parent status reports Accepted=True for the current observedGeneration",
+      "supports": "route-accepted-for-processing",
+      "does_not_establish": ["route-programmed-in-dataplane", "traffic-reaches-this-route"]
+    },
+    {
+      "id": "programmed-condition",
+      "observation": "implementation reports a current Programmed condition for the route/parent",
+      "supports": "controller-reported-programming-state",
+      "does_not_establish": ["end-to-end-traffic-outcome"]
+    },
+    {
+      "id": "dataplane-probe",
+      "observation": "request traffic resolves to the route's backend",
+      "supports": "route-effective-for-probed-traffic",
+      "does_not_establish": ["all-traffic-outcomes"]
+    }
+  ],
+  "negative_oracles": [
+    {
+      "id": "deterministic-conflict-indistinguishable-success",
+      "source": "kubernetes-sigs/gateway-api#4303",
+      "given": [
+        "two conflict-equivalent HTTPRoutes share one listener",
+        "protocol precedence yields one deterministic winner",
+        "dataplane probe reaches only the winner"
+      ],
+      "must_observe": [
+        "losing route exposes a machine-detectable non-success state for that parent"
+      ],
+      "must_reject": [
+        "winner and loser remain indistinguishable as successful after status convergence"
+      ],
+      "protocol_decision_left_open": "The oracle does not prescribe whether the losing state is Accepted=False, Programmed=False, or another standardized conflict condition."
+    }
+  ]
+}
