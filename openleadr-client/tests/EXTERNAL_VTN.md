@@ -140,6 +140,31 @@ OpenADR 3.x surface. If a deployment exposes stronger operation correlation outs
 base protocol, that evidence must be identified as deployment-specific rather than
 silently attributed to OpenADR itself.
 
+### Cross-protocol pressure test: Kubernetes
+
+The questions above are not specific to OpenADR. As a pressure test, Kubernetes exposes
+a materially richer native observation surface: object `uid` identifies an object,
+`resourceVersion` supports change detection and optimistic concurrency,
+`metadata.generation` identifies a desired-state generation, and many controller-managed
+statuses expose `observedGeneration` to say which desired-state generation the controller
+has observed.
+
+That produces a different assurance ladder from OpenADR:
+
+| Kubernetes observation | Narrow supported statement | Remaining gap |
+| --- | --- | --- |
+| API mutation succeeds | API server accepted/persisted an object mutation | controller or workload effect |
+| resourceVersion changes | this API object changed | which higher-level effect resulted |
+| generation advances | desired specification changed | controller has observed that generation |
+| status.observedGeneration catches up | controller reports status based on that desired generation | workload/external effect may still lag or fail |
+| Ready/Available-style condition for the same generation | controller/runtime reports a stronger operational post-condition | end-user or physical-world outcome may remain outside Kubernetes |
+
+The reusable method is therefore not a common field schema. It is to identify each
+protocol's native observation and correlation primitives, then stop the claim at the
+first boundary the protocol cannot independently bridge. A second protocol producing a
+different ladder is evidence that this is a profiling method rather than an OpenADR-only
+taxonomy.
+
 ## Evidence checklist
 
 - [ ] `cargo fmt --check` and `cargo check -p openleadr-client --tests` pass
