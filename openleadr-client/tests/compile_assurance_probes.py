@@ -16,6 +16,10 @@ def compile_profile(path: Path) -> dict:
     data = json.loads(path.read_text())
     app = data["applicability"]
     probes = []
+    if app.get("profile") == "mixed-scope-not-reportable":
+        for oracle in data["negative_oracles"]:
+            if oracle.get("conformance_readiness", "ready") == "ready":
+                raise ValueError(f"{oracle.get('id', '<unknown>')}: mixed-scope profile cannot emit a ready normative probe")
 
     for oracle in data["negative_oracles"]:
         readiness = oracle.get("conformance_readiness", "ready")
@@ -66,7 +70,7 @@ def main() -> int:
     try:
         for arg in sys.argv[1:]:
             compiled.append(compile_profile(Path(arg)))
-    except (KeyError, ValueError, json.JSONDecodeError) as exc:
+    except (KeyError, ValueError, json.JSONDecodeError, OSError, TypeError) as exc:
         print(f"compile failed: {exc}", file=sys.stderr)
         return 1
 
