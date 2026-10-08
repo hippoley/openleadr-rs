@@ -10,6 +10,25 @@ on:
       - main
 
 jobs:
+  assurance-contracts:
+    name: Validate assurance contracts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Run assurance unit tests
+        run: python3 -m unittest discover -s openleadr-client/tests -p 'test_assurance_*.py' -v
+      - name: Validate assurance profiles
+        run: python3 openleadr-client/tests/validate_assurance_profiles.py
+      - name: Compile assurance probe plans
+        run: |
+          python3 openleadr-client/tests/compile_assurance_probes.py \
+            openleadr-client/tests/protocol-assurance-profile.json \
+            openleadr-client/tests/gateway-api-assurance-profile.json > /tmp/assurance-probes.json
+          python3 -m json.tool /tmp/assurance-probes.json > /dev/null
+
   build:
     name: Build and test
     runs-on: "${{ matrix.os }}"
