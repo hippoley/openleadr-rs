@@ -102,6 +102,19 @@ A verifier can reuse the following invariant without adopting this repository's 
 This is the `matched-but-unattributed` case. Its value is the negative boundary: a
 verifier that promotes this case is overclaiming what its evidence establishes.
 
+### Prior-art alignment
+
+This boundary should not be presented as a novel causal mechanism. Existing verification
+patterns already use a pre-action baseline plus a post-action delta to distinguish a
+run-scoped state change from ambient state, and pair that delta with an action-specific
+tag or equivalent scoping when concurrent writers are possible.
+
+The contribution exercised here is narrower: applying that verification discipline to
+an independently deployed OpenADR VTN and bounding the interoperability claim when the
+protocol or deployment does not expose enough correlation evidence. The useful output
+is therefore protocol-level conformance evidence and counterexamples, not a new causal
+inference primitive.
+
 ## Evidence checklist
 
 - [ ] `cargo fmt --check` and `cargo check -p openleadr-client --tests` pass
