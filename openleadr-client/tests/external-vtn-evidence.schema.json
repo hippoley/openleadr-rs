@@ -14,7 +14,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "0.2.0"
+      "const": "0.3.0"
     },
     "source_commit": {
       "type": "string",
@@ -151,7 +151,8 @@
           "resource_type",
           "resource_id",
           "observation",
-          "verified"
+          "verified",
+          "verdict"
         ],
         "properties": {
           "operation": {
@@ -195,6 +196,14 @@
               "string",
               "null"
             ]
+          },
+          "verdict": {
+            "enum": [
+              "matched",
+              "mismatched",
+              "inconclusive"
+            ],
+            "description": "Result of comparing the claimed effect with the external observation."
           }
         }
       }
@@ -229,16 +238,49 @@
           },
           "effect_verification": {
             "minItems": 1,
-            "contains": {
+            "not": {
+              "contains": {
+                "properties": {
+                  "verdict": {
+                    "enum": [
+                      "mismatched",
+                      "inconclusive"
+                    ]
+                  }
+                },
+                "required": [
+                  "verdict"
+                ]
+              }
+            },
+            "items": {
               "properties": {
                 "verified": {
                   "const": true
+                },
+                "verdict": {
+                  "const": "matched"
                 }
               },
               "required": [
-                "verified"
+                "verified",
+                "verdict"
               ]
             }
+          },
+          "cleanup": {
+            "properties": {
+              "verified": {
+                "const": true
+              },
+              "remaining_resources": {
+                "const": 0
+              }
+            },
+            "required": [
+              "verified",
+              "remaining_resources"
+            ]
           }
         }
       }
