@@ -25,22 +25,29 @@ fn default_credentials(auth_role: AuthRole) -> ClientCredentials {
     ClientCredentials::new(id.to_string(), secr.to_string())
 }
 
+// Do not silently fall back to another identity when an explicitly set secret is malformed.
+fn credential_env(name: &str) -> Option<String> {
+    match std::env::var(name) {
+        Ok(value) => Some(value),
+        Err(VarError::NotPresent) => None,
+        Err(VarError::NotUnicode(_)) => panic!("Invalid encoding for credential environment variable: {name}"),
+    }
+}
+
 fn external_vtn_credentials(auth_role: AuthRole) -> ClientCredentials {
     let (id_var, secret_var) = match auth_role {
         AuthRole::Bl => ("OPENLEADR_RS_BL_CLIENT_ID", "OPENLEADR_RS_BL_CLIENT_SECRET"),
         AuthRole::Ven => ("OPENLEADR_RS_VEN_CLIENT_ID", "OPENLEADR_RS_VEN_CLIENT_SECRET"),
     };
-    let legacy_id = std::env::var("OPENLEADR_RS_CLIENT_ID").ok();
-    let legacy_secret = std::env::var("OPENLEADR_RS_CLIENT_SECRET").ok();
-    let client_id = std::env::var(id_var)
-        .ok()
+    let legacy_id = credential_env("OPENLEADR_RS_CLIENT_ID");
+    let legacy_secret = credential_env("OPENLEADR_RS_CLIENT_SECRET");
+    let client_id = credential_env(id_var)
         .or(legacy_id)
         .unwrap_or_else(|| match auth_role {
             AuthRole::Bl => "bl-client".to_string(),
             AuthRole::Ven => "ven-client-client-id".to_string(),
         });
-    let client_secret = std::env::var(secret_var)
-        .ok()
+    let client_secret = credential_env(secret_var)
         .or(legacy_secret)
         .unwrap_or_else(|| match auth_role {
             AuthRole::Bl => "bl-client".to_string(),
