@@ -16,6 +16,12 @@ class FailClosedStructureTests(unittest.TestCase):
             errors = validate(path)
             self.assertTrue(any(expected in error for error in errors), errors)
 
+    def test_mixed_scope_ready_oracle_rejected(self):
+        self.check_invalid({"applicability": {"profile": "mixed-scope-not-reportable"}, "negative_oracles": [{"id": "x", "must_reject": ["x"], "conformance_readiness": "ready"}]}, "mixed-scope profile cannot declare ready normative conformance")
+
+    def test_unknown_readiness_rejected(self):
+        self.check_invalid({"applicability": {}, "negative_oracles": [{"id": "x", "must_reject": ["x"], "conformance_readiness": "invented"}]}, "unknown conformance_readiness")
+
     def test_non_object_root(self):
         self.check_invalid([], "profile root must be an object")
 
