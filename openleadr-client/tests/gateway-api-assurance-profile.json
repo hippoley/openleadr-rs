@@ -84,7 +84,19 @@
           "supports_candidate": "Conformance checks for externally effective routing/listener behavior may require status plus dataplane observation rather than status alone.",
           "does_not_establish": "That every Gateway API status condition requires a dataplane probe, or that the reported Cilium behavior is normative."
         }
-      ]
+      ],
+      "adoption_target": {
+        "repository": "howardjohn/gateway-api-bench",
+        "integration_point": "cross-implementation status-plus-dataplane benchmark",
+        "rationale": "The project explicitly tests real Gateway API behavior beyond official conformance and has already triggered implementation follow-up work; this oracle matches its existing status-plus-traffic testing model.",
+        "proposed_contract": [
+          "create a deterministic listener protocol conflict",
+          "wait for current-generation rejected/not-programmed status",
+          "probe rejected listener paths at the dataplane",
+          "fail if a rejected listener remains externally effective"
+        ],
+        "externalization_status": "blocked-by-github-integration-403"
+      }
     }
   ],
   "applicability": {
