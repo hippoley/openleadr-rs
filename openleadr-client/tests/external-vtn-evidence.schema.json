@@ -14,7 +14,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "0.3.0"
+      "const": "0.4.0"
     },
     "source_commit": {
       "type": "string",
@@ -134,15 +134,16 @@
       "type": "string",
       "enum": [
         "execution-only",
+        "effect-observed",
         "independent-vtn-crud",
         "interoperability-candidate"
       ],
       "default": "execution-only",
-      "description": "Bounded claim supported by this evidence. This schema never represents certification."
+      "description": "Maximum bounded claim supported by the evidence. effect-observed does not imply this action caused the observed state. This schema never represents certification."
     },
     "effect_verification": {
       "type": "array",
-      "description": "Observed externally readable state changes. This distinguishes a request/trace receipt from evidence that the target system actually changed state.",
+      "description": "Externally readable state observations. Agreement with an expected state does not by itself establish that this test action produced that state.",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -152,7 +153,9 @@
           "resource_id",
           "observation",
           "verified",
-          "verdict"
+          "verdict",
+          "attribution",
+          "pre_action_observation"
         ],
         "properties": {
           "operation": {
@@ -204,6 +207,24 @@
               "inconclusive"
             ],
             "description": "Result of comparing the claimed effect with the external observation."
+          },
+          "attribution": {
+            "enum": [
+              "unattributed",
+              "bounded"
+            ],
+            "description": "bounded means the run captured evidence that narrows attribution to this action; it is not a universal proof of causality."
+          },
+          "pre_action_observation": {
+            "type": "boolean",
+            "description": "Whether target state was observed before the action, so a pre-existing matching state can be detected."
+          },
+          "operation_correlation": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Target-system correlation key linking the action to the observed mutation, when available."
           }
         }
       }
@@ -260,11 +281,19 @@
                 },
                 "verdict": {
                   "const": "matched"
+                },
+                "attribution": {
+                  "const": "bounded"
+                },
+                "pre_action_observation": {
+                  "const": true
                 }
               },
               "required": [
                 "verified",
-                "verdict"
+                "verdict",
+                "attribution",
+                "pre_action_observation"
               ]
             }
           },
