@@ -232,3 +232,15 @@ observed gap
 For #4303, an upstream comment proposing the minimal decision boundary was attempted
 from this workstream but GitHub integration returned HTTP 403. No upstream comment
 or contribution is claimed from that attempt.
+
+
+#### Cross-implementation contradiction pair
+
+Gateway implementations now provide evidence for both directions of status/effect divergence:
+
+- Cilium #46917: rejected/not-programmed listeners remain externally effective.
+- kgateway #14453: accepted/programmed listener state can coexist with an Envoy NACK and an unreachable fresh listener (or stale last-known-good behavior on an existing listener).
+
+This pair is stronger than treating either bug as a product-specific defect. It motivates a narrow assurance rule for externally effective Gateway behavior: controller status and dataplane observation are distinct evidence surfaces, and a conformance claim that spans both must reject contradictions between them.
+
+This does **not** imply that every Gateway API condition requires an end-to-end probe. The reusable claim is limited to obligations that assert externally effective programming or rejection.
