@@ -199,6 +199,15 @@ pub async fn setup_program_client<K: ClientKind>(
 
 #[allow(unused)]
 pub async fn setup_client_with_role<K: ClientKind>(db: PgPool, role: AuthRole) -> Client<K> {
+    if let Ok(url) = std::env::var("OPENLEADR_RS_VTN_URL")
+        .or_else(|e| match e {
+            VarError::NotPresent => std::env::var("OPENADR_VTN_URL"),
+            other => Err(other),
+        })
+    {
+        let url = url.parse().expect("Invalid external VTN URL");
+        return setup_url_client_with_role(url, role);
+    }
     let cred = default_credentials(role);
     let storage = PostgresStorage::new(db).unwrap();
     let app_state = AppState::new(storage, &VtnConfig::from_env()).await;
