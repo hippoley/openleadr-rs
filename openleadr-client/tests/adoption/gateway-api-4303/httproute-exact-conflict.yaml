@@ -1,0 +1,35 @@
+# Transplant draft for kubernetes-sigs/gateway-api#4303.
+# Creation order makes exact-conflict-a older and therefore the deterministic winner.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: exact-conflict-a
+  namespace: gateway-conformance-infra
+spec:
+  parentRefs:
+  - name: same-namespace
+  rules:
+  - matches:
+    - path:
+        type: Exact
+        value: /exact-conflict
+    backendRefs:
+    - name: infra-backend-v1
+      port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: exact-conflict-b
+  namespace: gateway-conformance-infra
+spec:
+  parentRefs:
+  - name: same-namespace
+  rules:
+  - matches:
+    - path:
+        type: Exact
+        value: /exact-conflict
+    backendRefs:
+    - name: infra-backend-v2
+      port: 8080
