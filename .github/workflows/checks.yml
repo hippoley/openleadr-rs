@@ -18,6 +18,8 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
+      - name: Install schema test dependency
+        run: python3 -m pip install 'jsonschema>=4.20,<5'
       - name: Run assurance unit tests
         run: python3 -m unittest discover -s openleadr-client/tests -p 'test_assurance_*.py' -v
       - name: Validate assurance profiles
