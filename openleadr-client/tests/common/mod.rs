@@ -105,6 +105,33 @@ impl HttpClient for MockClientRef {
     }
 }
 
+fn enforce_external_only_guard() {
+    if std::env::var("OPENLEADR_RS_REQUIRE_EXTERNAL_VTN").as_deref() != Ok("1") {
+        return;
+    }
+    let external_url = std::env::var("OPENLEADR_RS_VTN_URL").or_else(|e| match e {
+        VarError::NotPresent => std::env::var("OPENADR_VTN_URL"),
+        other => Err(other),
+    });
+    match external_url {
+        Ok(url) if !url.trim().is_empty() => {}
+        Ok(_) => panic!("External-only test mode requires a non-empty external VTN URL"),
+        Err(_) => panic!("External-only test mode requires OPENLEADR_RS_VTN_URL or OPENADR_VTN_URL; refusing in-tree PostgreSQL fallback"),
+    }
+}
+
+#[cfg(test)]
+mod external_guard_tests {
+    use super::*;
+    #[test]
+    fn guard_is_noop_when_not_requested() {
+        // Purely checks the disabled path; no environment mutation or external service needed.
+        if std::env::var("OPENLEADR_RS_REQUIRE_EXTERNAL_VTN").as_deref() != Ok("1") {
+            enforce_external_only_guard();
+        }
+    }
+}
+
 pub struct TestContext<K> {
     pub client: Client<K>,
 }
@@ -119,12 +146,7 @@ impl<K> Deref for TestContext<K> {
 #[allow(unused)]
 pub async fn setup<K: ClientKind>(auth_role: AuthRole) -> TestContext<K> {
     let _ = dotenvy::dotenv();
-    if std::env::var("OPENLEADR_RS_REQUIRE_EXTERNAL_VTN").as_deref() == Ok("1")
-        && std::env::var("OPENLEADR_RS_VTN_URL").is_err()
-        && std::env::var("OPENADR_VTN_URL").is_err()
-    {
-        panic!("External-only test mode requires OPENLEADR_RS_VTN_URL or OPENADR_VTN_URL; refusing in-tree PostgreSQL fallback");
-    }
+    enforce_external_only_guard();
     match std::env::var("OPENLEADR_RS_VTN_URL").or_else(|e| match e {
         VarError::NotPresent => std::env::var("OPENADR_VTN_URL"),
         other => Err(other),
@@ -179,6 +201,7 @@ pub fn setup_url_client_with_role<K: ClientKind>(url: Url, role: AuthRole) -> Cl
 }
 
 pub async fn setup_client<K: ClientKind>(db: PgPool) -> Client<K> {
+    enforce_external_only_guard();
     match std::env::var("OPENLEADR_RS_VTN_URL").or_else(|e| match e {
         VarError::NotPresent => std::env::var("OPENADR_VTN_URL"),
         other => Err(other),
@@ -213,6 +236,7 @@ pub async fn setup_program_client<K: ClientKind>(
 
 #[allow(unused)]
 pub async fn setup_client_with_role<K: ClientKind>(db: PgPool, role: AuthRole) -> Client<K> {
+    enforce_external_only_guard();
     match std::env::var("OPENLEADR_RS_VTN_URL").or_else(|e| match e {
         VarError::NotPresent => std::env::var("OPENADR_VTN_URL"),
         other => Err(other),
