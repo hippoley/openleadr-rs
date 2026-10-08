@@ -47,7 +47,10 @@
       "must_reject": [
         "winner and loser remain indistinguishable as successful after status convergence"
       ],
-      "protocol_decision_left_open": "The oracle does not prescribe whether the losing state is Accepted=False, Programmed=False, or another standardized conflict condition."
+      "protocol_decision_left_open": "The oracle does not prescribe whether the losing state is Accepted=False, Programmed=False, or another standardized conflict condition.",
+      "conformance_readiness": "spec-decision-required",
+      "blocking_decision": "Gateway API must standardize which Route status condition/reason distinguishes the deterministic loser before a normative conformance test can assert that vocabulary.",
+      "ready_invariant": "The deterministic loser must not remain indistinguishable from the winner as successfully effective for the same parent after status convergence and dataplane verification."
     }
   ],
   "applicability": {
