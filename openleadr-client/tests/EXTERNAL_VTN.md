@@ -61,6 +61,19 @@ not certification, and a run against the in-tree VTN must not be labeled
 This gives reviewers and downstream automation a stable evidence shape without requiring
 them to trust prose or screenshots.
 
+
+### Effect verification, not just execution receipts
+
+Version 0.2 of the evidence schema draws a deliberate boundary between evidence that a
+request/test ran and evidence that the target VTN exposed the expected resulting state.
+An `independent-vtn-crud` or `interoperability-candidate` claim therefore requires an
+independently deployed VTN plus at least one verified effect observation (for example,
+read-after-write or not-found-after-delete).
+
+This is intentionally narrower than general-purpose agent evidence bundles: the goal here
+is not to invent another trace/archive format, but to make a protocol integration claim
+depend on an observable effect in the target system.
+
 ## Evidence checklist
 
 - [ ] `cargo fmt --check` and `cargo check -p openleadr-client --tests` pass
