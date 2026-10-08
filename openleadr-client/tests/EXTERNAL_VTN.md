@@ -115,6 +115,31 @@ protocol or deployment does not expose enough correlation evidence. The useful o
 is therefore protocol-level conformance evidence and counterexamples, not a new causal
 inference primitive.
 
+### OpenADR assurance profile (draft)
+
+This work is also not a replacement for an OpenADR specification conformance suite.
+A black-box conformance suite answers whether a VTN behaves as required by cited OpenADR
+clauses. This profile asks a different question: given the observations an OpenADR client
+can obtain from that VTN, what state-change claim can an autonomous caller independently
+support?
+
+Initial capability mapping:
+
+| OpenADR observation | What it supports | What it does not establish |
+| --- | --- | --- |
+| successful POST/PUT/DELETE response | request accepted at the VTN API boundary | externally persistent effect or attribution |
+| VTN-assigned object ID | stable identity for subsequent reads of that object | identity of the actor that caused a later state |
+| created/modification timestamps | server-reported temporal metadata | exclusive causation by this test action |
+| read-after-write matching expected fields | externally observable post-state | that the post-state differed from the pre-state |
+| pre-action read plus post-action read | a state delta within the observation window | exclusion of a concurrent writer |
+| not-found after delete | deletion is externally observable at read time | which actor caused deletion without stronger correlation |
+| independently deployed VTN | observation crosses the client implementation boundary | independent causal attribution by itself |
+
+The profile should be revised from actual independent-VTN runs and from the normative
+OpenADR 3.x surface. If a deployment exposes stronger operation correlation outside the
+base protocol, that evidence must be identified as deployment-specific rather than
+silently attributed to OpenADR itself.
+
 ## Evidence checklist
 
 - [ ] `cargo fmt --check` and `cargo check -p openleadr-client --tests` pass
