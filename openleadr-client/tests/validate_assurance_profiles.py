@@ -44,6 +44,11 @@ def validate(path: Path) -> list[str]:
                 errors.append(f"{path}: negative_oracles[{i}] blocked oracle needs blocking_decision")
             if not oracle.get("ready_invariant"):
                 errors.append(f"{path}: negative_oracles[{i}] blocked oracle needs ready_invariant")
+        for j, evidence in enumerate(oracle.get("implementation_evidence", [])):
+            if not evidence.get("observation"):
+                errors.append(f"{path}: negative_oracles[{i}].implementation_evidence[{j}] needs observation")
+            if not evidence.get("does_not_establish"):
+                errors.append(f"{path}: negative_oracles[{i}].implementation_evidence[{j}] needs does_not_establish")
 
     return errors
 
