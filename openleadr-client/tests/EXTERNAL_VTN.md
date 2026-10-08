@@ -47,6 +47,20 @@ It would **not** prove full OpenADR compliance, VEN role authorization, all reso
 3. Existing SQLx-backed integration tests are not all converted to remote-only tests. Run the focused commands above; a full `cargo test` may still require PostgreSQL.
 4. No real third-party VTN run, CI result, or maintainer acceptance is asserted by this document. Record the VTN implementation/version, runner commit SHA, redacted configuration, command, exit code, and cleanup result before claiming independent reproducibility.
 
+## Machine-readable evidence artifact
+
+For a run that will be shared or cited, record the result against
+`external-vtn-evidence.schema.json`. The schema deliberately separates the exact source
+commit, independently deployed VTN identity/version, runner environment, per-test exit
+codes and redacted-log digests, and post-run cleanup verification.
+
+A result should use the narrowest supported claim. In particular, a passing command is
+not certification, and a run against the in-tree VTN must not be labeled
+`independent-vtn-crud`.
+
+This gives reviewers and downstream automation a stable evidence shape without requiring
+them to trust prose or screenshots.
+
 ## Evidence checklist
 
 - [ ] `cargo fmt --check` and `cargo check -p openleadr-client --tests` pass
