@@ -74,6 +74,22 @@ This is intentionally narrower than general-purpose agent evidence bundles: the 
 is not to invent another trace/archive format, but to make a protocol integration claim
 depend on an observable effect in the target system.
 
+## Attribution boundary
+
+A matching read-back is deliberately not treated as proof that the tested action caused
+the observed state. The state may already have matched before the request, or another
+actor may have produced the same mutation.
+
+Schema v0.4 therefore separates `effect-observed` from stronger integration claims.
+The stronger claims require a pre-action observation and bounded attribution evidence.
+The example artifact intentionally demonstrates the important negative case:
+`matched-but-unattributed`. Its read-back matches, but its claim ceiling remains
+`effect-observed`.
+
+This is an auditability rule, not a claim of general causal identification. Protocols
+that expose stronger mutation/correlation identifiers can record them as additional
+evidence; protocols that do not must not manufacture attribution from timing alone.
+
 ## Evidence checklist
 
 - [ ] `cargo fmt --check` and `cargo check -p openleadr-client --tests` pass
