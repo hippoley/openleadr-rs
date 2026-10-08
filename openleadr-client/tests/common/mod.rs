@@ -96,7 +96,10 @@ impl<K> Deref for TestContext<K> {
 #[allow(unused)]
 pub async fn setup<K: ClientKind>(auth_role: AuthRole) -> TestContext<K> {
     let _ = dotenvy::dotenv();
-    match std::env::var("OPENLEADR_RS_VTN_URL") {
+    match std::env::var("OPENLEADR_RS_VTN_URL").or_else(|e| match e {
+        VarError::NotPresent => std::env::var("OPENADR_VTN_URL"),
+        other => Err(other),
+    }) {
         Ok(url) => match url.parse() {
             Ok(url) => TestContext {
                 client: setup_url_client(url),
@@ -143,7 +146,10 @@ pub fn setup_url_client<K: ClientKind>(url: Url) -> Client<K> {
 }
 
 pub async fn setup_client<K: ClientKind>(db: PgPool) -> Client<K> {
-    match std::env::var("OPENLEADR_RS_VTN_URL") {
+    match std::env::var("OPENLEADR_RS_VTN_URL").or_else(|e| match e {
+        VarError::NotPresent => std::env::var("OPENADR_VTN_URL"),
+        other => Err(other),
+    }) {
         Ok(url) => match url.parse() {
             Ok(url) => setup_url_client(url),
             Err(e) => panic!("Could not parse URL: {e}"),
