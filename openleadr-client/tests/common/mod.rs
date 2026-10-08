@@ -25,12 +25,27 @@ fn default_credentials(auth_role: AuthRole) -> ClientCredentials {
     ClientCredentials::new(id.to_string(), secr.to_string())
 }
 
-fn external_vtn_credentials() -> ClientCredentials {
-    let client_id =
-        std::env::var("OPENLEADR_RS_CLIENT_ID").unwrap_or_else(|_| "admin".to_string());
-    let client_secret =
-        std::env::var("OPENLEADR_RS_CLIENT_SECRET").unwrap_or_else(|_| "admin".to_string());
-
+fn external_vtn_credentials(auth_role: AuthRole) -> ClientCredentials {
+    let (id_var, secret_var) = match auth_role {
+        AuthRole::Bl => ("OPENLEADR_RS_BL_CLIENT_ID", "OPENLEADR_RS_BL_CLIENT_SECRET"),
+        AuthRole::Ven => ("OPENLEADR_RS_VEN_CLIENT_ID", "OPENLEADR_RS_VEN_CLIENT_SECRET"),
+    };
+    let legacy_id = std::env::var("OPENLEADR_RS_CLIENT_ID").ok();
+    let legacy_secret = std::env::var("OPENLEADR_RS_CLIENT_SECRET").ok();
+    let client_id = std::env::var(id_var)
+        .ok()
+        .or(legacy_id)
+        .unwrap_or_else(|| match auth_role {
+            AuthRole::Bl => "bl-client".to_string(),
+            AuthRole::Ven => "ven-client-client-id".to_string(),
+        });
+    let client_secret = std::env::var(secret_var)
+        .ok()
+        .or(legacy_secret)
+        .unwrap_or_else(|| match auth_role {
+            AuthRole::Bl => "bl-client".to_string(),
+            AuthRole::Ven => "ven-client".to_string(),
+        });
     ClientCredentials::new(client_id, client_secret)
 }
 
@@ -102,7 +117,7 @@ pub async fn setup<K: ClientKind>(auth_role: AuthRole) -> TestContext<K> {
     }) {
         Ok(url) => match url.parse() {
             Ok(url) => TestContext {
-                client: setup_url_client(url),
+                client: setup_url_client_with_role(url, auth_role),
             },
             Err(e) => panic!("Could not parse URL: {e}"),
         },
@@ -142,7 +157,11 @@ pub async fn setup_mock_client<K: ClientKind>(db: PgPool) -> Client<K> {
 }
 
 pub fn setup_url_client<K: ClientKind>(url: Url) -> Client<K> {
-    Client::with_url(url, Some(external_vtn_credentials()))
+    setup_url_client_with_role(url, AuthRole::Bl)
+}
+
+pub fn setup_url_client_with_role<K: ClientKind>(url: Url, role: AuthRole) -> Client<K> {
+    Client::with_url(url, Some(external_vtn_credentials(role)))
 }
 
 pub async fn setup_client<K: ClientKind>(db: PgPool) -> Client<K> {
