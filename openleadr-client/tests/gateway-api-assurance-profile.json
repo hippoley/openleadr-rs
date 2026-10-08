@@ -10,19 +10,26 @@
       "id": "accepted-condition",
       "observation": "HTTPRoute parent status reports Accepted=True for the current observedGeneration",
       "supports": "route-accepted-for-processing",
-      "does_not_establish": ["route-programmed-in-dataplane", "traffic-reaches-this-route"]
+      "does_not_establish": [
+        "route-programmed-in-dataplane",
+        "traffic-reaches-this-route"
+      ]
     },
     {
       "id": "programmed-condition",
       "observation": "implementation reports a current Programmed condition for the route/parent",
       "supports": "controller-reported-programming-state",
-      "does_not_establish": ["end-to-end-traffic-outcome"]
+      "does_not_establish": [
+        "end-to-end-traffic-outcome"
+      ]
     },
     {
       "id": "dataplane-probe",
       "observation": "request traffic resolves to the route's backend",
       "supports": "route-effective-for-probed-traffic",
-      "does_not_establish": ["all-traffic-outcomes"]
+      "does_not_establish": [
+        "all-traffic-outcomes"
+      ]
     }
   ],
   "negative_oracles": [
@@ -42,5 +49,14 @@
       ],
       "protocol_decision_left_open": "The oracle does not prescribe whether the losing state is Accepted=False, Programmed=False, or another standardized conflict condition."
     }
-  ]
+  ],
+  "applicability": {
+    "conformance_system": "Kubernetes Gateway API",
+    "profile": "GATEWAY-HTTP",
+    "feature_scope": [
+      "HTTPRoute",
+      "deterministic route conflict"
+    ],
+    "report_visibility_requirement": "The generated probe must belong to a declared conformance profile/feature so its result is not invisible to reports."
+  }
 }
