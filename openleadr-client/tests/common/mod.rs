@@ -119,6 +119,12 @@ impl<K> Deref for TestContext<K> {
 #[allow(unused)]
 pub async fn setup<K: ClientKind>(auth_role: AuthRole) -> TestContext<K> {
     let _ = dotenvy::dotenv();
+    if std::env::var("OPENLEADR_RS_REQUIRE_EXTERNAL_VTN").as_deref() == Ok("1")
+        && std::env::var("OPENLEADR_RS_VTN_URL").is_err()
+        && std::env::var("OPENADR_VTN_URL").is_err()
+    {
+        panic!("External-only test mode requires OPENLEADR_RS_VTN_URL or OPENADR_VTN_URL; refusing in-tree PostgreSQL fallback");
+    }
     match std::env::var("OPENLEADR_RS_VTN_URL").or_else(|e| match e {
         VarError::NotPresent => std::env::var("OPENADR_VTN_URL"),
         other => Err(other),
