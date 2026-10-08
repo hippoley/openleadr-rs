@@ -13,7 +13,9 @@
     "cleanup"
   ],
   "properties": {
-    "schema_version": { "const": "0.1.0" },
+    "schema_version": {
+      "const": "0.2.0"
+    },
     "source_commit": {
       "type": "string",
       "pattern": "^[0-9a-f]{40}$",
@@ -22,12 +24,26 @@
     "vtn": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["implementation", "version", "deployment"],
+      "required": [
+        "implementation",
+        "version",
+        "deployment"
+      ],
       "properties": {
-        "implementation": { "type": "string", "minLength": 1 },
-        "version": { "type": "string", "minLength": 1 },
+        "implementation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
         "deployment": {
-          "enum": ["independent", "in-tree", "unknown"],
+          "enum": [
+            "independent",
+            "in-tree",
+            "unknown"
+          ],
           "description": "independent means the VTN was deployed separately from the test process."
         }
       }
@@ -35,11 +51,26 @@
     "runner": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["rust_version", "os"],
+      "required": [
+        "rust_version",
+        "os"
+      ],
       "properties": {
-        "rust_version": { "type": "string", "minLength": 1 },
-        "os": { "type": "string", "minLength": 1 },
-        "ci_run_url": { "type": ["string", "null"], "format": "uri" }
+        "rust_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "os": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ci_run_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        }
       }
     },
     "tests": {
@@ -48,13 +79,28 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["name", "command", "exit_code"],
+        "required": [
+          "name",
+          "command",
+          "exit_code"
+        ],
         "properties": {
-          "name": { "type": "string", "minLength": 1 },
-          "command": { "type": "string", "minLength": 1 },
-          "exit_code": { "type": "integer" },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "command": {
+            "type": "string",
+            "minLength": 1
+          },
+          "exit_code": {
+            "type": "integer"
+          },
           "log_sha256": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "pattern": "^[0-9a-f]{64}$",
             "description": "Digest of a separately retained, redacted log."
           }
@@ -64,11 +110,24 @@
     "cleanup": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["verified", "remaining_resources"],
+      "required": [
+        "verified",
+        "remaining_resources"
+      ],
       "properties": {
-        "verified": { "type": "boolean" },
-        "remaining_resources": { "type": "integer", "minimum": 0 },
-        "notes": { "type": ["string", "null"] }
+        "verified": {
+          "type": "boolean"
+        },
+        "remaining_resources": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       }
     },
     "claim": {
@@ -80,6 +139,109 @@
       ],
       "default": "execution-only",
       "description": "Bounded claim supported by this evidence. This schema never represents certification."
+    },
+    "effect_verification": {
+      "type": "array",
+      "description": "Observed externally readable state changes. This distinguishes a request/trace receipt from evidence that the target system actually changed state.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "operation",
+          "resource_type",
+          "resource_id",
+          "observation",
+          "verified"
+        ],
+        "properties": {
+          "operation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resource_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resource_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "observation": {
+            "enum": [
+              "read-after-write",
+              "not-found-after-delete",
+              "independent-observer"
+            ]
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "before_sha256": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "after_sha256": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "claim": {
+            "enum": [
+              "independent-vtn-crud",
+              "interoperability-candidate"
+            ]
+          }
+        },
+        "required": [
+          "claim"
+        ]
+      },
+      "then": {
+        "required": [
+          "effect_verification"
+        ],
+        "properties": {
+          "vtn": {
+            "properties": {
+              "deployment": {
+                "const": "independent"
+              }
+            }
+          },
+          "effect_verification": {
+            "minItems": 1,
+            "contains": {
+              "properties": {
+                "verified": {
+                  "const": true
+                }
+              },
+              "required": [
+                "verified"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
 }
