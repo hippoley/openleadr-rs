@@ -97,6 +97,43 @@
         ],
         "externalization_status": "blocked-by-github-integration-403"
       }
+    },
+    {
+      "id": "programmed-but-ineffective",
+      "source": "kgateway-dev/kgateway#14453",
+      "given": [
+        "listener status reports Accepted=True",
+        "listener status reports Programmed=True"
+      ],
+      "must_observe": [
+        "dataplane probe confirms a newly programmed listener actually accepts traffic"
+      ],
+      "must_reject": [
+        "status-only success when the dataplane rejected the listener configuration or the listener remains unreachable"
+      ],
+      "reason": "Controller-reported Programmed=True is not sufficient evidence of dataplane effect when Envoy can NACK the generated listener.",
+      "conformance_readiness": "ready",
+      "implementation_evidence": [
+        {
+          "implementation": "kgateway",
+          "evidence_type": "status-effect-contradiction",
+          "observation": "kgateway issue #14453 reports Accepted=True and Programmed=True while Envoy NACKs a fresh listener and the port remains unreachable; an existing listener can continue serving last-known-good configuration.",
+          "supports_candidate": "Externally effective programming claims should be checked against dataplane observation when downstream xDS rejection can diverge from Kubernetes status.",
+          "does_not_establish": "That every Programmed=True condition requires an end-to-end traffic probe, or that kgateway's extension validation semantics are Gateway API normative behavior."
+        }
+      ],
+      "adoption_target": {
+        "repository": "howardjohn/gateway-api-bench",
+        "integration_point": "cross-implementation status-plus-dataplane contradiction benchmark",
+        "rationale": "The benchmark already measures route readiness with live traffic and documents status/dataplane divergence across implementations.",
+        "proposed_contract": [
+          "create a listener/configuration expected to be reported programmed",
+          "wait for current-generation Accepted=True and Programmed=True",
+          "probe the listener at the dataplane",
+          "fail if the listener remains unreachable or only stale last-known-good behavior is effective"
+        ],
+        "externalization_status": "not-yet-attempted"
+      }
     }
   ],
   "applicability": {
