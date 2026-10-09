@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.4.0",
+  "schema_version": "0.5.0",
   "source_commit": "0000000000000000000000000000000000000000",
   "vtn": {
     "implementation": "REPLACE_WITH_VTN_IMPLEMENTATION",
@@ -39,6 +39,17 @@
       "attribution": "unattributed",
       "pre_action_observation": false,
       "operation_correlation": null
+    }
+  ],
+  "fault_injection": [
+    {
+      "name": "program_post_create_panic",
+      "command": "OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE=1 cargo test -p openleadr-client --test program program_crud -- --exact --nocapture",
+      "expected_nonzero_exit": true,
+      "observed_exit_code": -1,
+      "cleanup_verified": false,
+      "remaining_resources": 0,
+      "log_sha256": null
     }
   ]
 }
