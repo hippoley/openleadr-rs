@@ -142,3 +142,11 @@ NA for credentials state means no persistent state is required of the configurat
 - **HCA cross-story impact:** compilation gate applies to US53-01/02/03/04/05/06/07; the guard regression gate applies to US53-03/04/05. CI explicitly excludes ignored destructive remote VTN tests, which remain BLOCKED pending isolated service access.
 - **Critical acceptance boundary:** green local/CI tests do not prove external VTN behavior, post-crash reconciliation or cross-host serialization. Do not promote any story to Verified Closed without independent E2E evidence.
 - **Resume:** inspect the latest actual CI run on this branch and its failing job logs, fix compiler/test failures, record exact run IDs and statuses. Then run controlled external VTN and failure-injection acceptance.
+
+## Actual CI compiler counterexample and repair (2026-10-09)
+
+- **Independent failed run:** https://github.com/hippoley/openleadr-rs/actions/runs/37892209559 (conclusion FAILURE, Rust exit 101, compilation stage). Its job log shows `error[E0061]` in `openleadr-client/tests/external_vtn_readonly.rs:65`: `Client::get_event_list` needs `Option<&ProgramId>` followed by `Filter`, but probe supplied only `Filter`.
+- **P0 compiler repair committed:** `37012bade30ceaed33d9f94e4081c44fb441ec12` changes `get_event_list(Filter::none())` to `get_event_list(None, Filter::none())` following the compiler's API signature. This preserves a global Event list request without a per-Program filter.
+- **Retest run:** https://github.com/hippoley/openleadr-rs/actions/runs/37892618922 was QUEUED upon inspection; status **RETEST_PENDING**, no pass claims.
+- **HCA linkage:** US53-02 external Event list functional correctness, test compilation, client API compatibility, and regression coverage. DEF-10 = P0 incorrect get_event_list signature; fixed in source, independent validation pending.
+- **Remaining limitations:** workflow may still fail on additional errors; normal tests do not exercise a real VTN, and even green CI cannot close US53-02/05 or #53. Reinspect the above CI run, extract exact new failures, fix and rerun. Do not label Verified Closed until required vertical and horizontal acceptance evidence exists.
