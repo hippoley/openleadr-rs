@@ -22,6 +22,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067
         with:
           toolchain: stable
+      - name: Validate Issue 53 benchmark dataset and scoring contract
+        run: |
+          python3 benchmarks/issue53/score.py
+          python3 -m unittest discover -s benchmarks/issue53 -p 'test_*.py'
       - name: Compile integration test binaries without a live VTN
         run: cargo test -p openleadr-client --tests --no-run
       - name: Run pure guard tests without external mutation
