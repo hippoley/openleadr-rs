@@ -43,6 +43,9 @@ jobs:
     timeout-minutes: 55
     env:
       SQLX_OFFLINE: "true"
+      DATABASE_URL: postgres://openadr:openadr@127.0.0.1:5432/openadr
+      OAUTH_TOKEN_URL: http://127.0.0.1:3000/auth/token
+      OAUTH_VALID_AUDIENCES: http://127.0.0.1:3000
       OPENLEADR_RS_VTN_URL: http://127.0.0.1:3000/
       OPENLEADR_RS_CLIENT_ID: bl-client
       OPENLEADR_RS_CLIENT_SECRET: bl-client
@@ -57,6 +60,8 @@ jobs:
         run: docker compose up -d db mqtt --wait
       - name: Install SQLx migration CLI and initialize test credentials
         run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
           cargo install sqlx-cli --locked --version 0.8.6 --no-default-features --features postgres
           cargo sqlx migrate run --source openleadr-vtn/migrations
           psql -v ON_ERROR_STOP=1 "$DATABASE_URL" < fixtures/users.sql
