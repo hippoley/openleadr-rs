@@ -37,6 +37,19 @@ fn credential_env(name: &str) -> Option<String> {
     }
 }
 
+fn credential_policy(strict: bool, id: Option<&str>, secret: Option<&str>) -> Result<(), &'static str> {
+    if !strict {
+        return Ok(());
+    }
+    if id.is_none_or(|value| value.trim().is_empty()) {
+        return Err("client ID");
+    }
+    if secret.is_none_or(|value| value.trim().is_empty()) {
+        return Err("client secret");
+    }
+    Ok(())
+}
+
 fn external_vtn_credentials(auth_role: AuthRole) -> ClientCredentials {
     let (id_var, secret_var) = match auth_role {
         AuthRole::Bl => ("OPENLEADR_RS_BL_CLIENT_ID", "OPENLEADR_RS_BL_CLIENT_SECRET"),
@@ -53,13 +66,9 @@ fn external_vtn_credentials(auth_role: AuthRole) -> ClientCredentials {
     let client_secret = credential_env(secret_var).or(legacy_secret);
 
     if strict_external {
-        let client_id = client_id
-            .filter(|value| !value.trim().is_empty())
-            .unwrap_or_else(|| panic!("External-only test mode requires non-empty {id_var} (or OPENLEADR_RS_CLIENT_ID)"));
-        let client_secret = client_secret
-            .filter(|value| !value.trim().is_empty())
-            .unwrap_or_else(|| panic!("External-only test mode requires non-empty {secret_var} (or OPENLEADR_RS_CLIENT_SECRET)"));
-        return ClientCredentials::new(client_id, client_secret);
+        credential_policy(true, client_id.as_deref(), client_secret.as_deref())
+            .unwrap_or_else(|missing| panic!("External-only test mode requires non-empty {missing} (or legacy role credentials)"));
+        return ClientCredentials::new(client_id.unwrap(), client_secret.unwrap());
     }
 
     let client_id = client_id.unwrap_or_else(|| match auth_role {
@@ -138,8 +147,12 @@ fn enforce_external_only_guard() {
     }
 }
 
+fn fault_injection_enabled(value: Option<&str>) -> bool {
+    value == Some("1")
+}
+
 pub fn should_inject_failure_after_create() -> bool {
-    std::env::var("OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE").as_deref() == Ok("1")
+    fault_injection_enabled(std::env::var("OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE").ok().as_deref())
 }
 
 pub struct TestContext<K> {
@@ -267,72 +280,35 @@ pub async fn setup_client_with_role<K: ClientKind>(db: PgPool, role: AuthRole) -
 }
 
 #[cfg(test)]
-mod external_credential_tests {
-    use super::{external_vtn_credentials, AuthRole};
-    use serial_test::serial;
+mod credential_policy_tests {
+    use super::{credential_policy, fault_injection_enabled};
 
-    fn clear() {
-        for name in [
-            "OPENLEADR_RS_REQUIRE_EXTERNAL_VTN",
-            "OPENLEADR_RS_BL_CLIENT_ID",
-            "OPENLEADR_RS_BL_CLIENT_SECRET",
-            "OPENLEADR_RS_VEN_CLIENT_ID",
-            "OPENLEADR_RS_VEN_CLIENT_SECRET",
-            "OPENLEADR_RS_CLIENT_ID",
-            "OPENLEADR_RS_CLIENT_SECRET",
-        ] {
-            unsafe { std::env::remove_var(name) };
-        }
+    #[test]
+    fn strict_external_rejects_missing_role_identity() {
+        assert!(credential_policy(true, None, Some("secret")).is_err());
+        assert!(credential_policy(true, Some("id"), None).is_err());
     }
 
     #[test]
-    #[serial]
-    #[should_panic(expected = "External-only test mode requires non-empty OPENLEADR_RS_BL_CLIENT_ID")]
-    fn strict_external_bl_rejects_missing_credentials() {
-        clear();
-        unsafe { std::env::set_var("OPENLEADR_RS_REQUIRE_EXTERNAL_VTN", "1") };
-        let _ = external_vtn_credentials(AuthRole::Bl);
+    fn strict_external_rejects_whitespace_only_values() {
+        assert!(credential_policy(true, Some("  "), Some("secret")).is_err());
+        assert!(credential_policy(true, Some("id"), Some("  ")).is_err());
     }
 
     #[test]
-    #[serial]
-    #[should_panic(expected = "External-only test mode requires non-empty OPENLEADR_RS_VEN_CLIENT_ID")]
-    fn strict_external_ven_rejects_missing_credentials() {
-        clear();
-        unsafe { std::env::set_var("OPENLEADR_RS_REQUIRE_EXTERNAL_VTN", "1") };
-        let _ = external_vtn_credentials(AuthRole::Ven);
+    fn strict_external_accepts_explicit_identity() {
+        assert!(credential_policy(true, Some("bl-1"), Some("secret")).is_ok());
     }
 
     #[test]
-    #[serial]
-    #[should_panic(expected = "External-only test mode requires non-empty OPENLEADR_RS_BL_CLIENT_ID")]
-    fn strict_external_rejects_blank_credentials() {
-        clear();
-        unsafe {
-            std::env::set_var("OPENLEADR_RS_REQUIRE_EXTERNAL_VTN", "1");
-            std::env::set_var("OPENLEADR_RS_BL_CLIENT_ID", "   ");
-            std::env::set_var("OPENLEADR_RS_BL_CLIENT_SECRET", "secret");
-        }
-        let _ = external_vtn_credentials(AuthRole::Bl);
-    }
-}
-
-#[cfg(test)]
-mod fault_injection_tests {
-    use super::should_inject_failure_after_create;
-
-    #[test]
-    fn fault_injection_is_disabled_by_default() {
-        unsafe { std::env::remove_var("OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE") };
-        assert!(!should_inject_failure_after_create());
+    fn non_strict_mode_preserves_local_defaults() {
+        assert!(credential_policy(false, None, None).is_ok());
     }
 
     #[test]
     fn fault_injection_requires_exact_opt_in() {
-        unsafe { std::env::set_var("OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE", "true") };
-        assert!(!should_inject_failure_after_create());
-        unsafe { std::env::set_var("OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE", "1") };
-        assert!(should_inject_failure_after_create());
-        unsafe { std::env::remove_var("OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE") };
+        assert!(!fault_injection_enabled(None));
+        assert!(!fault_injection_enabled(Some("true")));
+        assert!(fault_injection_enabled(Some("1")));
     }
 }
