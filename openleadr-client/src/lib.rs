@@ -116,11 +116,22 @@ pub struct Client<K> {
     client_ref: Arc<ClientRef<K>>,
 }
 
+/// Authentication method used at an OAuth2 token endpoint.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TokenEndpointAuthMethod {
+    /// RFC 6749 client password authentication via HTTP Basic (default).
+    ClientSecretBasic,
+    /// RFC 6749 client credentials supplied in the form body.
+    ClientSecretPost,
+}
+
 /// Credentials necessary for authentication at the VTN
 pub struct ClientCredentials {
     #[allow(missing_docs)]
     pub client_id: String,
     client_secret: String,
+    /// Token endpoint authentication method; defaults to HTTP Basic.
+    pub token_endpoint_auth_method: TokenEndpointAuthMethod,
     /// Margin to refresh the authentication token with the client_id and client_secret before it expired
     /// This is helpful to prevent an "unauthorized"
     /// due to small differences in client/server times and network latency
@@ -137,6 +148,7 @@ impl Debug for ClientCredentials {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct(std::any::type_name::<Self>())
             .field("client_id", &self.client_id)
+            .field("token_endpoint_auth_method", &self.token_endpoint_auth_method)
             .field("refresh_margin", &self.refresh_margin)
             .field(
                 "default_credential_expires_in",
@@ -155,9 +167,17 @@ impl ClientCredentials {
         Self {
             client_id,
             client_secret,
+            token_endpoint_auth_method: TokenEndpointAuthMethod::ClientSecretBasic,
             refresh_margin: Duration::from_secs(60),
             default_credential_expires_in: Duration::from_secs(3600),
         }
+    }
+
+    /// Select the authentication method required by the token endpoint.
+    /// Do not retry with another method automatically, to avoid disclosing secrets.
+    pub fn with_token_endpoint_auth_method(mut self, method: TokenEndpointAuthMethod) -> Self {
+        self.token_endpoint_auth_method = method;
+        self
     }
 }
 
@@ -230,16 +250,21 @@ impl<K: ClientKind> ClientRef<K> {
         }
 
         // we should authenticate
+        let post_auth = auth_data.token_endpoint_auth_method == TokenEndpointAuthMethod::ClientSecretPost;
         let request = self
             .client
             .request_builder(Method::POST, self.oauth_base_url.clone())
             .form(&AccessTokenRequest {
                 grant_type: "client_credentials",
                 scope: None,
-                client_id: None,
-                client_secret: None,
+                client_id: post_auth.then(|| auth_data.client_id.clone()),
+                client_secret: post_auth.then(|| auth_data.client_secret.clone()),
             });
-        let request = request.basic_auth(&auth_data.client_id, Some(&auth_data.client_secret));
+        let request = if post_auth {
+            request
+        } else {
+            request.basic_auth(&auth_data.client_id, Some(&auth_data.client_secret))
+        };
         let request = request.header("Accept", "application/json");
         let since = Instant::now();
         let res = self.client.send(request).await?;
