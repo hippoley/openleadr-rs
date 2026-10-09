@@ -11,6 +11,8 @@ use serial_test::file_serial;
 mod common;
 #[path = "external_mutation_guard.rs"]
 mod external_mutation_guard;
+#[path = "external_recovery_journal.rs"]
+mod external_recovery_journal;
 
 #[tokio::test]
 #[file_serial(openleadr_external_vtn)]
@@ -18,15 +20,21 @@ mod external_mutation_guard;
 async fn event_lifecycle_without_local_database() {
     let url = external_mutation_guard::authorized_mutation_url();
 
-    let client = common::setup_url_client::<BusinessLogic>(url);
+    let client = common::setup_url_client::<BusinessLogic>(url.clone());
     let name = format!("openleadr-event-probe-{}", Uuid::new_v4());
+    let mut journal = external_recovery_journal::RecoveryJournal::begin("Event", &name, url.as_str())
+        .expect("durable recovery journal required before remote parent CREATE");
     let program = client.create_program(ProgramRequest::new(&name)).await
         .expect("create parent Program failed");
     let program_id = program.id().clone();
+    journal.record(&format!("PARENT_CREATED program_id={program_id:?}")).expect("journal parent ID");
 
     let request = EventRequest::new(program_id.clone()).with_event_name(&name);
     // Do not return early after creating the parent.
     let event_creation = program.create_event(request.clone()).await;
+    if let Ok(event) = &event_creation {
+        journal.record(&format!("EVENT_CREATED event_id={:?}", event.id())).expect("journal Event ID");
+    }
     // A failed transport response does not prove the VTN rejected the CREATE.
     // With no returned Event ID, keep the parent for manual reconciliation.
     let event_creation_uncertain = event_creation.is_err();
@@ -90,6 +98,7 @@ async fn event_lifecycle_without_local_database() {
         Err(e) if e.is_not_found() => (),
         other => panic!("POST-DELETE CHECK FAILED: Program {program_id:?} unexpectedly observable: {other:?}"),
     }
+    journal.record("CLEANUP_VERIFIED").expect("durably record completed cleanup");
     assert!(verification.is_ok(), "Event checks failed: {verification:?}");
     eprintln!("EVENT_CRUD PASS; Event and parent Program removed");
 }
