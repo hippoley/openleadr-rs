@@ -25,9 +25,9 @@ def base_artifact():
             {"name": "ven_role_cannot_create_program", "command": "cargo test --test program ven_role_cannot_create_program -- --exact", "exit_code": 0, "log_sha256": "7" * 64},
             {"name": "concurrent_program_runs_do_not_cross_delete", "command": "cargo test --test program concurrent_program_runs_do_not_cross_delete -- --exact", "exit_code": 0, "log_sha256": "8" * 64}
         ],
-        "cleanup": {"verified": True, "remaining_resources": 0, "log_sha256": "3" * 64},
+        "cleanup": {"verified": True, "remaining_resources": 0},
         "fault_injection": [
-            {"name": "program_post_create_panic", "command": "OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE=1 cargo test --test program program_crud -- --exact", "expected_nonzero_exit": True, "observed_exit_code": 101, "cleanup_verified": True, "remaining_resources": 0},
+            {"name": "program_post_create_panic", "command": "OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE=1 cargo test --test program program_crud -- --exact", "expected_nonzero_exit": True, "observed_exit_code": 101, "cleanup_verified": True, "remaining_resources": 0, "log_sha256": "3" * 64},
             {"name": "event_post_create_panic", "command": "OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE=1 cargo test --test event event_crud -- --exact", "expected_nonzero_exit": True, "observed_exit_code": 101, "cleanup_verified": True, "remaining_resources": 0, "log_sha256": "4" * 64}
         ],
         "claim": "independent-vtn-crud",
@@ -46,6 +46,11 @@ class EvidenceClaimTests(unittest.TestCase):
 
     def assert_invalid(self, evidence):
         self.assertTrue(list(VALIDATOR.iter_errors(evidence)), evidence)
+
+    def test_example_template_matches_schema(self):
+        example_path = Path(__file__).with_name("external-vtn-evidence.example.json")
+        example = json.loads(example_path.read_text())
+        self.assert_valid(example)
 
     def test_valid_bounded_claim(self):
         self.assert_valid(base_artifact())
