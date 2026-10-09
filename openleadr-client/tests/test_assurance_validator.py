@@ -52,6 +52,15 @@ class FailClosedStructureTests(unittest.TestCase):
     def test_non_list_implementation_evidence(self):
         self.check_invalid({"applicability": {}, "negative_oracles": [{"id": "x", "must_reject": ["x"], "implementation_evidence": {}}]}, "implementation_evidence must be a list")
 
+    def test_non_list_evidence_boundary(self):
+        self.check_invalid({"applicability": {}, "evidence_surface": [{"id": "x", "observation": "x", "supports": "x", "does_not_establish": "not a list"}]}, "must bound at least one stronger claim")
+
+    def test_non_string_readiness(self):
+        self.check_invalid({"applicability": {}, "negative_oracles": [{"id": "x", "must_reject": ["x"], "conformance_readiness": []}]}, "unknown conformance_readiness")
+
+    def test_non_string_conformance_system(self):
+        self.check_invalid({"applicability": {"conformance_system": 42}}, "applicability.conformance_system is required")
+
 
 if __name__ == "__main__":
     unittest.main()
