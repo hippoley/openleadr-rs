@@ -17,7 +17,7 @@ The upstream README describes an OpenADR 3.1 Rust VEN client and VTN server. The
 | US-05 failure cleanup | all created IDs deleted and independently checked after assertion failure/panic | focused CRUD tests now catch unwind, retain created IDs, retry deletion, and surface cleanup errors | IMPLEMENTED; fault-injection and independent-VTN verification still required |
 | US-06 test isolation | concurrent test binaries/runners do not delete each other's objects | UUID names and serial tests; no cross-process lock | PARTIAL |
 | US-07 independent reproduction | target implementation/version, exact commit, redacted logs, command, exits, observed effect | JSON Schema and documentation | CONTRACT PRESENT; actual independent artifact NOT VERIFIED |
-| US-08 claim ceiling | failed tests, non-independent deployment, unverified effect, or residual resources cannot produce strong interoperability claim | JSON Schema v0.4 and new exit-code constraint | CI-VERIFIED CONTRACT; actual independent artifact still needed |
+| US-08 claim ceiling | failed tests, non-independent deployment, unverified effect, or residual resources cannot produce strong interoperability claim | JSON Schema v0.7 with paired Program/Event success, paired fault-injection cleanup, operation correlation, and retained-log/observation digests | CI-VERIFIED CONTRACT; actual independent artifact still needed |
 | US-09 assurance contract CI | validator tests, profile validation and compiler run on PR | Added `assurance-contracts` job to `.github/workflows/checks.yml` | CI VERIFIED; assurance job and repository checks have passed on this branch |
 | US-10 mixed-scope safety | unresolved Gateway status semantics cannot become reportable normative test | validator + compiler readiness gate | CODE PRESENT; runtime CI pending |
 | US-11 official Gateway adoption | native conformance PR reviewed/merged | #4303 draft only, normative blocker; prior write attempts 403 | HOLD; NOT ADOPTED |
@@ -28,9 +28,9 @@ The upstream README describes an OpenADR 3.1 Rust VEN client and VTN server. The
 
 ## Stop-the-line gaps
 
-1. **P0: No verified third-party VTN execution**. A contract, test function, or schema does not establish interoperability.
+1. **P0: No verified third-party VTN execution**. A contract, test function, schema, or operator-entered digest does not establish interoperability; an independently deployed target and retained evidence are still required.
 2. **P0: Failure cleanup lacks fault-injection proof**. Cleanup-on-unwind is implemented and repository CI passes, but no deliberately injected mid-CRUD failure has yet demonstrated zero residual resources on an independent VTN.
-3. **P0: Claim integrity beyond schema**. Strong-claim schema regressions now run in CI, including failed-test and missing-correlation rejection; a real independent artifact must still exercise the same ceiling.
+3. **P0: Claim integrity beyond schema**. Strong-claim regressions cover failed tests, missing correlation, partial CRUD/fault coverage, cleanup residue, and missing evidence digests. The latest v0.7 commit still requires CI completion, and a real independent artifact must exercise the same ceiling.
 4. **P1: CI trust**. Assurance Python checks and repository Rust checks are now verified on branch CI; external-VTN smoke remains intentionally outside ordinary CI until credentials/target are available.
 5. **P1: Role and isolation**. Negative VEN/BL permission cases and cross-run resource isolation are not established by the two focused CRUD tests.
 6. **P1: Provenance**. The upstream OpenLEADR badges, Alliance test screenshot, and sponsor claims describe the upstream project, not proof of this fork's branch.
