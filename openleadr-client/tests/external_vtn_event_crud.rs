@@ -6,23 +6,17 @@
 use openleadr_client::BusinessLogic;
 use openleadr_wire::{event::EventRequest, program::ProgramRequest};
 use uuid::Uuid;
-use url::Url;
+use serial_test::serial;
 
 mod common;
+#[path = "external_mutation_guard.rs"]
+mod external_mutation_guard;
 
 #[tokio::test]
+#[serial]
 #[ignore = "destructive live VTN test; requires isolated server and explicit authorization"]
 async fn event_lifecycle_without_local_database() {
-    assert_eq!(
-        std::env::var("OPENLEADR_RS_ALLOW_MUTATION").as_deref(),
-        Ok("I_UNDERSTAND"),
-        "explicit opt-in required"
-    );
-    let url: Url = std::env::var("OPENLEADR_RS_VTN_URL")
-        .expect("external VTN URL required").parse().expect("valid URL required");
-    assert_eq!(url.scheme(), "https", "HTTPS required for mutation");
-    assert!(url.username().is_empty() && url.password().is_none());
-    assert!(url.query().is_none() && url.fragment().is_none());
+    let url = external_mutation_guard::authorized_mutation_url();
 
     let client = common::setup_url_client::<BusinessLogic>(url);
     let name = format!("openleadr-event-probe-{}", Uuid::new_v4());
