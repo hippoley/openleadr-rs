@@ -62,7 +62,7 @@ sqlx = { version = "0.8.6", features = ["postgres", "runtime-tokio", "chrono", "
 argon2 = "0.5.3"
 dotenvy = "0.15.7"
 
-serial_test = "3.4.0"
+serial_test = { version = "3.4.0", features = ["file_locks"] }
 
 iso_currency = { version = "0.5.3", features = ["with-serde"] }
 
