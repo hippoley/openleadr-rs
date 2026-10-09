@@ -287,13 +287,18 @@
                 },
                 "pre_action_observation": {
                   "const": true
+                },
+                "operation_correlation": {
+                  "type": "string",
+                  "minLength": 1
                 }
               },
               "required": [
                 "verified",
                 "verdict",
                 "attribution",
-                "pre_action_observation"
+                "pre_action_observation",
+                "operation_correlation"
               ]
             }
           },
