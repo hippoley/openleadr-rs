@@ -47,18 +47,29 @@ fn external_vtn_credentials(auth_role: AuthRole) -> ClientCredentials {
     };
     let legacy_id = credential_env("OPENLEADR_RS_CLIENT_ID");
     let legacy_secret = credential_env("OPENLEADR_RS_CLIENT_SECRET");
-    let client_id = credential_env(id_var)
-        .or(legacy_id)
-        .unwrap_or_else(|| match auth_role {
-            AuthRole::Bl => "bl-client".to_string(),
-            AuthRole::Ven => "ven-client-client-id".to_string(),
-        });
-    let client_secret = credential_env(secret_var)
-        .or(legacy_secret)
-        .unwrap_or_else(|| match auth_role {
-            AuthRole::Bl => "bl-client".to_string(),
-            AuthRole::Ven => "ven-client".to_string(),
-        });
+    let strict_external =
+        std::env::var("OPENLEADR_RS_REQUIRE_EXTERNAL_VTN").as_deref() == Ok("1");
+    let client_id = credential_env(id_var).or(legacy_id);
+    let client_secret = credential_env(secret_var).or(legacy_secret);
+
+    if strict_external {
+        let client_id = client_id
+            .filter(|value| !value.trim().is_empty())
+            .unwrap_or_else(|| panic!("External-only test mode requires non-empty {id_var} (or OPENLEADR_RS_CLIENT_ID)"));
+        let client_secret = client_secret
+            .filter(|value| !value.trim().is_empty())
+            .unwrap_or_else(|| panic!("External-only test mode requires non-empty {secret_var} (or OPENLEADR_RS_CLIENT_SECRET)"));
+        return ClientCredentials::new(client_id, client_secret);
+    }
+
+    let client_id = client_id.unwrap_or_else(|| match auth_role {
+        AuthRole::Bl => "bl-client".to_string(),
+        AuthRole::Ven => "ven-client-client-id".to_string(),
+    });
+    let client_secret = client_secret.unwrap_or_else(|| match auth_role {
+        AuthRole::Bl => "bl-client".to_string(),
+        AuthRole::Ven => "ven-client".to_string(),
+    });
     ClientCredentials::new(client_id, client_secret)
 }
 
