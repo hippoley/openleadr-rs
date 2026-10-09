@@ -24,6 +24,8 @@ jobs:
           toolchain: stable
       - name: Validate scenario metadata and false-pass assertions
         run: python3 benchmarks/issue53/validate.py
+      - name: Audit duplicate manifest coverage and unmapped cases
+        run: python3 benchmarks/issue53/audit_crosswalk.py
       - name: Validate Issue 53 benchmark dataset and scoring contract
         run: |
           python3 benchmarks/issue53/score.py
