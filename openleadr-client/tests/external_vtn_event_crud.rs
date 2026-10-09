@@ -27,6 +27,9 @@ async fn event_lifecycle_without_local_database() {
     let request = EventRequest::new(program_id.clone()).with_event_name(&name);
     // Do not return early after creating the parent.
     let event_creation = program.create_event(request.clone()).await;
+    // A failed transport response does not prove the VTN rejected the CREATE.
+    // With no returned Event ID, keep the parent for manual reconciliation.
+    let event_creation_uncertain = event_creation.is_err();
     let mut event_id = None;
     let verification = match event_creation {
         Err(err) => Err(format!("create Event failed: {err:?}")),
@@ -62,7 +65,9 @@ async fn event_lifecycle_without_local_database() {
     };
     // Never remove the parent when its Event cleanup failed. This preserves
     // the relationship needed for later recovery and avoids hiding orphans.
-    let parent_cleanup = if event_cleanup.is_ok() {
+    let parent_cleanup = if event_creation_uncertain {
+        Err("parent preserved: Event CREATE outcome uncertain; reconcile by unique name".to_owned())
+    } else if event_cleanup.is_ok() {
         match client.get_program_by_id(&program_id).await {
             Ok(p) => p.delete().await.map(|_| ()).map_err(|e| format!("{e:?}")),
             Err(err) => Err(format!("cannot fetch parent for cleanup: {err:?}")),
