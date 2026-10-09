@@ -76,18 +76,27 @@ async fn concurrent_program_runs_do_not_cross_delete() {
     program_a.delete().await.unwrap();
 
     assert!(
-        ctx.get_program_by_id(&id_a)\n            .await\n            .unwrap_err()\n            .is_not_found(),
+        ctx.get_program_by_id(&id_a)
+            .await
+            .unwrap_err()
+            .is_not_found(),
         "run A resource must be deleted"
     );
     let surviving_b = ctx
         .get_program_by_id(&id_b)
         .await
         .expect("run A cleanup must not delete run B resource");
-    assert_eq!(\n        surviving_b.content().program_name,\n        format!("isolation-b-{run_b}")\n    );
+    assert_eq!(
+        surviving_b.content().program_name,
+        format!("isolation-b-{run_b}")
+    );
 
     surviving_b.delete().await.unwrap();
     assert!(
-        ctx.get_program_by_id(&id_b)\n            .await\n            .unwrap_err()\n            .is_not_found(),
+        ctx.get_program_by_id(&id_b)
+            .await
+            .unwrap_err()
+            .is_not_found(),
         "run B cleanup must delete only its own resource"
     );
 }
