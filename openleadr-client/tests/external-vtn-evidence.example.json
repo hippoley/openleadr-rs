@@ -4,7 +4,7 @@
   "vtn": {
     "implementation": "REPLACE_WITH_VTN_IMPLEMENTATION",
     "version": "REPLACE_WITH_VTN_VERSION",
-    "deployment": "independent"
+    "deployment": "unknown"
   },
   "runner": {
     "rust_version": "REPLACE_WITH_RUST_VERSION",
