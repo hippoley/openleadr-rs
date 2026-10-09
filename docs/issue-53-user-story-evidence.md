@@ -194,3 +194,21 @@ NA for credentials state means no persistent state is required of the configurat
 - Remote GitHub fetch confirmed 16/16 unique case identifiers with required fields. Python scorer execution and Cargo build NOT witnessed here; no live third-party VTN run. Candidate result with supplied trace is never automatically treated as independently verified.
 - HCA status: functional P, state P, integration B, security P, scalability N, maintainability P, observability P, testability P, user value B, external compatibility B. All stories remain NOT Verified Closed.
 - BENCH-01 P0: no executable driver connecting dataset cases to real endpoints; BENCH-02 P0: no independent trace/semantic oracle; BENCH-03 P1: no cross-implementation run provenance; BENCH-04 P1: no repeated performance measurements. Next gate is actual Python CI success, followed by authenticated isolated VTN fault cases.
+
+## Public GitHub Actions run evidence — 2026-10-09 (actual executed checks)
+
+**Source of truth**: [GitHub Actions Run 37896311620](https://github.com/hippoley/openleadr-rs/actions/runs/37896311620), job `113708343983`, head commit `00f75d98fc79c80b60dc02d8062b95f35756f3d3`, conclusion **success**. This is an executed CI job, not a source-only inspection.
+
+Job step outcomes retrieved from GitHub Actions: scenario metadata and false-pass assertions SUCCESS; crosswalk audit SUCCESS; JSONL scoring validation SUCCESS; Rust `cargo test -p openleadr-client --tests --no-run` SUCCESS; `external_mutation_guard` unit tests SUCCESS; `external_vtn_readonly` local tests SUCCESS.
+
+Direct job-log observations:
+- Benchmark manifest: `16 cases; {'pass': 0, 'not_executed': 16, 'fail': 0, 'blocked': 0}`.
+- Python counterexample suite: `Ran 6 tests` (successful job step).
+- Rust authorization guard: `3 passed; 0 failed; 0 ignored`.
+- Rust read-only URL checks: `2 passed; 0 failed; 2 ignored` (the ignored tests are actual external-VTN requests, **NOT successes**).
+
+**Acceptance interpretation**: The same commit has public evidence for compiling Rust test binaries and passing local benchmark/guard checks. This clears the former "no successful compilation evidence" blocker **for commit 00f75d98**, but does not establish compilation of later commits, actual remote VTN interoperability, recovery, role correctness, resource cleanup, or Issue #53 Verified Closed. All 16 benchmark scenario status fields remain `not_executed` in the canonical manifest. Independent VTN endpoint and authorized credentials are not available in this tool context.
+
+**Next executable gate**: run opt-in Program/Event tests on a disposable independent VTN with authorized credentials; capture redacted request/response logs, created resource IDs, cleanup audit, and a GitHub Actions run tied to the exact tested SHA. Do not mutate shared/production systems. Compare with the upstream `program.rs` and `event.rs` legacy sqlx tests before closure.
+
+**Note**: historical summaries saying "there is no Cargo compilation evidence" were correct at the time of those statements, but are superseded for this exact 2026-10-09 CI SHA. Avoid copying the superseded blocker into future summaries without checking Actions.
