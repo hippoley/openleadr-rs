@@ -29,9 +29,15 @@ async fn program_create_read_update_delete_without_pgpool() {
     let original_name = format!("openleadr-interoperability-{}", Uuid::new_v4());
     let original = ProgramRequest::new(&original_name);
 
-    // A creation failure makes no resource available to clean up.
-    let mut program = client.create_program(original.clone()).await
-        .expect("CREATE failed");
+    // A failed HTTP response does NOT prove CREATE was rolled back.
+    // Preserve the unique name and VTN URL for operator reconciliation.
+    let mut program = match client.create_program(original.clone()).await {
+        Ok(program) => program,
+        Err(error) => panic!(
+            "PROGRAM CREATE OUTCOME UNKNOWN: name={original_name}; error={error:?}. \
+             Inspect the dedicated VTN for this unique name before retrying or cleaning up."
+        ),
+    };
     let program_id = program.id().clone();
     eprintln!("PROGRAM_CREATED id={program_id:?} name={original_name}");
 
