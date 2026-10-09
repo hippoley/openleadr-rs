@@ -163,3 +163,11 @@ NA for credentials state means no persistent state is required of the configurat
 **Next executable entry**: prioritize disposable, authorized third-party VTN E2E + injected lost-response and failed-cleanup cases. Maintain a separate durable recovery journal and record deletion verification. Coordinate tests across hosts by isolated environments or an external lease; local file locking alone is insufficient.
 
 **Double closure**: no complete original #53 User Story is marked `Verified Closed`. The isolated P0 compiler defect DEF-10 is confirmed fixed by CI.
+
+## HCA follow-up: durable pre-CREATE intent markers (2026-10-09)
+
+- Review of the existing `external_recovery_journal.rs` showed it opens and syncs a unique journal before operations, but earlier clients only recorded successful CREATE results. A crash or lost response after POST could not be distinguished from a failure before attempting the POST.
+- **Source improvement:** Program CRUD now syncs `PROGRAM_CREATE_ATTEMPT` before the Program POST (`4865c39c2269afc408722526bff6a02b6ef73612`). Event CRUD syncs `PARENT_CREATE_ATTEMPT` before parent Program POST and `EVENT_CREATE_ATTEMPT` before child Event POST (`ac769bc48e8f163f7043210ce73ef5c7e326b6c1`). The journal records use the existing `sync_all` implementation; no new dependency.
+- **Independent acceptance:** CI run https://github.com/hippoley/openleadr-rs/actions/runs/37893644028 was queued at source inspection. Status `IMPLEMENTED_UNVERIFIED`; no crash/fault injection, journal replay or third-party VTN execution has been demonstrated.
+- **P0 remaining:** replay/reconcile the latest journal state with remote VTN before deletion; ensure idempotency and operator evidence. Note filesystem journal durability depends on reliable underlying storage; fsync does not imply remote operation atomicity.
+- **Scope:** improvement supports US53-05 (failed-test state preservation) but does not redefine Issue #53 or imply certification.
