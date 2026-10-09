@@ -47,3 +47,12 @@ The upstream README describes an OpenADR 3.1 Rust VEN client and VTN server. The
 ## Capital allocation
 
 Keep this branch focused on closing OpenADR interoperability and evidence truthfulness. Preserve the Gateway #4303 native transplant as a recoverable option until normative semantics change. Evaluate A2A conformance in its own upstream repository, not by adding unrelated test scaffolding here. External adoption stays **0** until an independently verifiable upstream incorporation, required test, or explicit architectural dependency exists.
+
+## Defect ledger
+
+| ID | Severity | User story | Defect | Resolution | Verification |
+| --- | --- | --- | --- | --- | --- |
+| D-001 | P0 | US-08 | v0.9 positive fixture omitted required Program fault `log_sha256` and added a forbidden cleanup property, so contract tests could fail for fixture drift rather than claim semantics | fixed in `e50b0fc`; template/schema parity regression added | latest branch CI pending |
+| D-002 | P0 | US-07/08 | evidence template pre-declared `deployment=independent` before an actual run | changed to `unknown` in `57328af`; regression proves untouched template cannot be promoted to a strong claim | latest branch CI pending |
+| D-003 | P1 | US-06 | UUID ownership alone did not prove multi-process isolation | ownership regression plus two-process external runner added | local contract present; independent execution pending |
+
