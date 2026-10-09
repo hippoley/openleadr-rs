@@ -85,3 +85,15 @@ A documented second OpenADR 3.1 implementation, `hupe1980/openadr`, provides a c
 | H-005 | P1 | US-02/06/14 | Tests in shared `common/mod.rs` changed process-global environment variables, risking cross-test interference despite per-test serial annotations | `5e3f9c2` extracted pure credential/fault policy tests; `8ddba8d` kept Rust toolchain compatibility | latest CI pending |
 | H-006 | P0 | US-01..08 | No pinned, documented candidate independent VTN execution path | `5062ed8` documented external VTN adapter and strict acceptance boundary without vendoring code | independent execution and license/version inspection still required |
 
+
+## External VTN read-only discovery adapter — 2026-10-09
+
+US-01/02/07 horizontal integration now includes `preflight_external_vtn.py`: validates HTTP(S) URL policy (remote HTTP forbidden), unauthenticated `GET /auth/server` discovery, HTTPS token endpoint downgrade, and OpenAPI Program/Event collection presence before any mutating tests. `test_assurance_external_vtn_preflight.py` provides independent negative cases. Both external runners now fail before CRUD on unsuccessful preflight. This proves **discovery contract structure only**; it does not prove BL/VEN authorization, complete CRUD, cleanup, protocol conformance, or official certification.
+
+The independent candidate recipe now uses `--client-hashed` with Argon2id rather than plaintext client secrets in process arguments, following upstream security guidance. Remaining external adoption gates: license and version verification, runtime compatibility, independent observation and actual v0.9 evidence. No external VTN was started during this round.
+
+| ID | Severity | Stories | Horizontal defect | Resolution | Acceptance |
+| --- | --- | --- | --- | --- | --- |
+| H-007 | P1 | US-01/02/07 | External evidence runner previously executed mutating probes without read-only discovery validation | preflight adapter, adversarial tests, fail-fast runner integration | latest CI and real external VTN execution pending |
+| H-008 | P1 | US-02 | Candidate VTN recipe passed plaintext secrets in process arguments | switched to `--client-hashed` and documented secret transfer boundaries | manual runtime verification pending |
+
