@@ -14,7 +14,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "0.8.0"
+      "const": "0.9.0"
     },
     "source_commit": {
       "type": "string",
@@ -92,7 +92,8 @@
             "enum": [
               "program_crud",
               "event_crud",
-              "ven_role_cannot_create_program"
+              "ven_role_cannot_create_program",
+              "concurrent_program_runs_do_not_cross_delete"
             ]
           },
           "command": {
@@ -369,7 +370,7 @@
             ]
           },
           "tests": {
-            "minItems": 3,
+            "minItems": 4,
             "allOf": [
               {
                 "contains": {
@@ -412,6 +413,24 @@
                   "properties": {
                     "name": {
                       "const": "ven_role_cannot_create_program"
+                    },
+                    "exit_code": {
+                      "const": 0
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "exit_code"
+                  ]
+                },
+                "minContains": 1,
+                "maxContains": 1
+              },
+              {
+                "contains": {
+                  "properties": {
+                    "name": {
+                      "const": "concurrent_program_runs_do_not_cross_delete"
                     },
                     "exit_code": {
                       "const": 0
