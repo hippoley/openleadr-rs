@@ -14,7 +14,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "0.6.0"
+      "const": "0.7.0"
     },
     "source_commit": {
       "type": "string",
@@ -82,7 +82,8 @@
         "required": [
           "name",
           "command",
-          "exit_code"
+          "exit_code",
+          "log_sha256"
         ],
         "properties": {
           "name": {
@@ -101,12 +102,9 @@
             "type": "integer"
           },
           "log_sha256": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "pattern": "^[0-9a-f]{64}$",
-            "description": "Digest of a separately retained, redacted log."
+            "description": "Digest of the retained redacted command log."
           }
         }
       }
@@ -159,7 +157,9 @@
           "verified",
           "verdict",
           "attribution",
-          "pre_action_observation"
+          "pre_action_observation",
+          "before_sha256",
+          "after_sha256"
         ],
         "properties": {
           "operation": {
@@ -185,17 +185,11 @@
             "type": "boolean"
           },
           "before_sha256": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "pattern": "^[0-9a-f]{64}$"
           },
           "after_sha256": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": "string",
             "pattern": "^[0-9a-f]{64}$"
           },
           "notes": {
@@ -245,7 +239,8 @@
           "expected_nonzero_exit",
           "observed_exit_code",
           "cleanup_verified",
-          "remaining_resources"
+          "remaining_resources",
+          "log_sha256"
         ],
         "properties": {
           "name": {
@@ -277,11 +272,9 @@
             "minimum": 0
           },
           "log_sha256": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "pattern": "^[0-9a-f]{64}$"
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "description": "Digest of the retained redacted fault-injection log."
           }
         }
       }
