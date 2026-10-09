@@ -33,6 +33,7 @@ async fn program_create_read_update_delete_without_pgpool() {
     let mut journal = external_recovery_journal::RecoveryJournal::begin("Program", &original_name, url.as_str())
         .expect("durable recovery journal required before remote CREATE");
     let original = ProgramRequest::new(&original_name);
+    journal.record("PROGRAM_CREATE_ATTEMPT").expect("persist Program intent before POST");
 
     // A failed HTTP response does NOT prove CREATE was rolled back.
     // Preserve the unique name and VTN URL for operator reconciliation.
