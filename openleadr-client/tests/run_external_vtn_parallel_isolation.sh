@@ -5,6 +5,7 @@ set -euo pipefail
 : "${OPENLEADR_RS_BL_CLIENT_ID:?set OPENLEADR_RS_BL_CLIENT_ID}"
 : "${OPENLEADR_RS_BL_CLIENT_SECRET:?set OPENLEADR_RS_BL_CLIENT_SECRET}"
 export OPENLEADR_RS_REQUIRE_EXTERNAL_VTN=1
+python3 openleadr-client/tests/preflight_external_vtn.py || exit 1
 
 OUT_DIR="${1:-external-vtn-parallel}"
 mkdir -p "$OUT_DIR"
