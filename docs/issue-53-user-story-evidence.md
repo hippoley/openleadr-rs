@@ -212,3 +212,12 @@ Direct job-log observations:
 **Next executable gate**: run opt-in Program/Event tests on a disposable independent VTN with authorized credentials; capture redacted request/response logs, created resource IDs, cleanup audit, and a GitHub Actions run tied to the exact tested SHA. Do not mutate shared/production systems. Compare with the upstream `program.rs` and `event.rs` legacy sqlx tests before closure.
 
 **Note**: historical summaries saying "there is no Cargo compilation evidence" were correct at the time of those statements, but are superseded for this exact 2026-10-09 CI SHA. Avoid copying the superseded blocker into future summaries without checking Actions.
+
+## Real upstream VTN network E2E gate (2026-10-09)
+
+- **Source commit** `af91f6f4f9e938524c742d879e2a28991e703cf8`: adds `.github/workflows/upstream-vtn-e2e.yml`, a real upstream VTN process backed by an ephemeral PostgreSQL 18 service, the project's SQL migrations and fixture BL role, and **ignored live** Program/Event listing probes over the loopback HTTP server. No production or third-party VTN is contacted.
+- **Public execution**: https://github.com/hippoley/openleadr-rs/actions/runs/37900349307 . Initial status QUEUED; **no pass or failure outcome yet** as of this ledger update.
+- **Public evidence outputs:** the workflow uploads `vtn.log`, `readonly-e2e.log`, and `seed.log` as a 30-day GitHub Actions artifact, including when the job fails. The log greps require both `PROGRAM_LIST PASS` and `EVENT_LIST PASS` alongside Cargo exit code 0.
+- **Vertical claim if green:** real upstream Rust VTN ↔ Rust VEN client authentication and list endpoints, with ephemeral local storage. Not evidence for third-party interoperability, mutation CRUD, cross-host isolation or crash recovery.
+- **Residual critical gates:** inspect this run's first outcome, repair any real errors and rerun, then obtain **authorized independent third-party VTN** results. A public URL and run artifacts cannot substitute for evidence that a distinct vendor implementation was exercised.
+- **US53-01/02/03 integration status:** E2E_RUN_QUEUED, no Verified Closed; **US53-05/06** remain incomplete.
