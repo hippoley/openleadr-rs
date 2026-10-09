@@ -68,9 +68,14 @@ async fn program_create_read_update_delete_without_pgpool() {
         );
     }
 
+    match client.get_program_by_id(&program_id).await {
+        Err(e) if e.is_not_found() => (),
+        other => panic!("POST-DELETE CHECK FAILED: program {original_name} {program_id:?} still observable or lookup failed: {other:?}"),
+    }
+
     assert!(
         verification.is_ok(),
         "Program protocol checks failed after successful cleanup: {verification:?}"
     );
-    eprintln!("PROGRAM_CRUD PASS; resource deleted");
+    eprintln!("PROGRAM_CRUD PASS; resource deletion verified");
 }
