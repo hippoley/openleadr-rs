@@ -1,0 +1,916 @@
+{
+  "version": 1,
+  "baseline": "USER_STORY_CLOSURE_AUDIT.md",
+  "dimension_order": [
+    "function",
+    "state",
+    "integration",
+    "security",
+    "performance",
+    "maintainability",
+    "observability",
+    "testing",
+    "user_value",
+    "external_compatibility"
+  ],
+  "status_vocabulary": [
+    "VERIFIED",
+    "PARTIAL",
+    "NOT_IMPLEMENTED",
+    "NOT_APPLICABLE",
+    "BLOCKED"
+  ],
+  "closure_rule": "VERIFIED_CLOSED requires all applicable dimensions VERIFIED, vertical and horizontal evidence, and independent acceptance; never infer official OpenADR certification.",
+  "stories": [
+    {
+      "id": "US-01",
+      "title": "external target selection",
+      "depends_on": [],
+      "impacts": [
+        "US-03",
+        "US-04"
+      ],
+      "priority": "P0",
+      "status": "PARTIAL",
+      "vertical_acceptance": "NOT_VERIFIED",
+      "horizontal_acceptance": "NOT_VERIFIED",
+      "dimensions": {
+        "function": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "state": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "integration": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "security": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "performance": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "maintainability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "observability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "testing": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "user_value": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "external_compatibility": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        }
+      },
+      "evidence": [],
+      "blockers": []
+    },
+    {
+      "id": "US-02",
+      "title": "BL/VEN credential separation",
+      "depends_on": [
+        "US-01"
+      ],
+      "impacts": [
+        "US-03",
+        "US-04"
+      ],
+      "priority": "P0",
+      "status": "PARTIAL",
+      "vertical_acceptance": "NOT_VERIFIED",
+      "horizontal_acceptance": "NOT_VERIFIED",
+      "dimensions": {
+        "function": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "state": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "integration": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "security": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "performance": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "maintainability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "observability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "testing": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "user_value": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "external_compatibility": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        }
+      },
+      "evidence": [],
+      "blockers": []
+    },
+    {
+      "id": "US-03",
+      "title": "Program CRUD",
+      "depends_on": [
+        "US-01",
+        "US-02"
+      ],
+      "impacts": [
+        "US-05",
+        "US-07"
+      ],
+      "priority": "P0",
+      "status": "PARTIAL",
+      "vertical_acceptance": "NOT_VERIFIED",
+      "horizontal_acceptance": "NOT_VERIFIED",
+      "dimensions": {
+        "function": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "state": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "integration": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "security": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "performance": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "maintainability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "observability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "testing": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "user_value": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "external_compatibility": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        }
+      },
+      "evidence": [],
+      "blockers": []
+    },
+    {
+      "id": "US-04",
+      "title": "Event CRUD",
+      "depends_on": [
+        "US-01",
+        "US-02",
+        "US-03"
+      ],
+      "impacts": [
+        "US-05",
+        "US-07"
+      ],
+      "priority": "P0",
+      "status": "PARTIAL",
+      "vertical_acceptance": "NOT_VERIFIED",
+      "horizontal_acceptance": "NOT_VERIFIED",
+      "dimensions": {
+        "function": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "state": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "integration": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "security": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "performance": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "maintainability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "observability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "testing": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "user_value": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "external_compatibility": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        }
+      },
+      "evidence": [],
+      "blockers": []
+    },
+    {
+      "id": "US-05",
+      "title": "failure cleanup",
+      "depends_on": [
+        "US-03",
+        "US-04"
+      ],
+      "impacts": [
+        "US-07"
+      ],
+      "priority": "P0",
+      "status": "PARTIAL",
+      "vertical_acceptance": "NOT_VERIFIED",
+      "horizontal_acceptance": "NOT_VERIFIED",
+      "dimensions": {
+        "function": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "state": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "integration": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "security": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "performance": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "maintainability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "observability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "testing": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "user_value": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "external_compatibility": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        }
+      },
+      "evidence": [],
+      "blockers": []
+    },
+    {
+      "id": "US-06",
+      "title": "cross-run isolation",
+      "depends_on": [
+        "US-03",
+        "US-04",
+        "US-05"
+      ],
+      "impacts": [
+        "US-07"
+      ],
+      "priority": "P0",
+      "status": "PARTIAL",
+      "vertical_acceptance": "NOT_VERIFIED",
+      "horizontal_acceptance": "NOT_VERIFIED",
+      "dimensions": {
+        "function": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "state": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "integration": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "security": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "performance": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "maintainability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "observability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "testing": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "user_value": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "external_compatibility": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        }
+      },
+      "evidence": [],
+      "blockers": []
+    },
+    {
+      "id": "US-07",
+      "title": "independent reproduction",
+      "depends_on": [
+        "US-01",
+        "US-02",
+        "US-03",
+        "US-04",
+        "US-05",
+        "US-06",
+        "US-08"
+      ],
+      "impacts": [
+        "US-13"
+      ],
+      "priority": "P0",
+      "status": "BLOCKED",
+      "vertical_acceptance": "NOT_VERIFIED",
+      "horizontal_acceptance": "NOT_VERIFIED",
+      "dimensions": {
+        "function": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "state": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "integration": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "security": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "performance": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "maintainability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "observability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "testing": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "user_value": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "external_compatibility": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        }
+      },
+      "evidence": [],
+      "blockers": [
+        "independent external adoption or execution evidence missing"
+      ]
+    },
+    {
+      "id": "US-08",
+      "title": "evidence claim ceiling",
+      "depends_on": [
+        "US-07"
+      ],
+      "impacts": [
+        "US-13"
+      ],
+      "priority": "P0",
+      "status": "PARTIAL",
+      "vertical_acceptance": "NOT_VERIFIED",
+      "horizontal_acceptance": "NOT_VERIFIED",
+      "dimensions": {
+        "function": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "state": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "integration": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "security": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "performance": {
+          "status": "NOT_APPLICABLE",
+          "reason": "This story defines an evidence/governance boundary, not a latency or throughput target."
+        },
+        "maintainability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "observability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "testing": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "user_value": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "external_compatibility": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        }
+      },
+      "evidence": [],
+      "blockers": []
+    },
+    {
+      "id": "US-09",
+      "title": "assurance contract CI",
+      "depends_on": [],
+      "impacts": [
+        "US-08",
+        "US-10"
+      ],
+      "priority": "P1",
+      "status": "PARTIAL",
+      "vertical_acceptance": "NOT_VERIFIED",
+      "horizontal_acceptance": "NOT_VERIFIED",
+      "dimensions": {
+        "function": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "state": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "integration": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "security": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "performance": {
+          "status": "NOT_APPLICABLE",
+          "reason": "This story defines an evidence/governance boundary, not a latency or throughput target."
+        },
+        "maintainability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "observability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "testing": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "user_value": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "external_compatibility": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        }
+      },
+      "evidence": [],
+      "blockers": []
+    },
+    {
+      "id": "US-10",
+      "title": "mixed-scope conformance safety",
+      "depends_on": [
+        "US-09"
+      ],
+      "impacts": [
+        "US-11"
+      ],
+      "priority": "P1",
+      "status": "PARTIAL",
+      "vertical_acceptance": "NOT_VERIFIED",
+      "horizontal_acceptance": "NOT_VERIFIED",
+      "dimensions": {
+        "function": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "state": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "integration": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "security": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "performance": {
+          "status": "NOT_APPLICABLE",
+          "reason": "This story defines an evidence/governance boundary, not a latency or throughput target."
+        },
+        "maintainability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "observability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "testing": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "user_value": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "external_compatibility": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        }
+      },
+      "evidence": [],
+      "blockers": []
+    },
+    {
+      "id": "US-11",
+      "title": "Gateway official adoption",
+      "depends_on": [
+        "US-10"
+      ],
+      "impacts": [
+        "US-13"
+      ],
+      "priority": "P2",
+      "status": "HOLD",
+      "vertical_acceptance": "NOT_VERIFIED",
+      "horizontal_acceptance": "NOT_VERIFIED",
+      "dimensions": {
+        "function": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "state": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "integration": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "security": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "performance": {
+          "status": "NOT_APPLICABLE",
+          "reason": "This story defines an evidence/governance boundary, not a latency or throughput target."
+        },
+        "maintainability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "observability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "testing": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "user_value": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "external_compatibility": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        }
+      },
+      "evidence": [],
+      "blockers": []
+    },
+    {
+      "id": "US-12",
+      "title": "A2A adoption",
+      "depends_on": [],
+      "impacts": [
+        "US-13"
+      ],
+      "priority": "P2",
+      "status": "OUT_OF_SCOPE",
+      "vertical_acceptance": "NOT_VERIFIED",
+      "horizontal_acceptance": "NOT_VERIFIED",
+      "dimensions": {
+        "function": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "state": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "integration": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "security": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "performance": {
+          "status": "NOT_APPLICABLE",
+          "reason": "This story defines an evidence/governance boundary, not a latency or throughput target."
+        },
+        "maintainability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "observability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "testing": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "user_value": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "external_compatibility": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        }
+      },
+      "evidence": [],
+      "blockers": []
+    },
+    {
+      "id": "US-13",
+      "title": "published external identity",
+      "depends_on": [
+        "US-07",
+        "US-11"
+      ],
+      "impacts": [],
+      "priority": "P2",
+      "status": "BLOCKED",
+      "vertical_acceptance": "NOT_VERIFIED",
+      "horizontal_acceptance": "NOT_VERIFIED",
+      "dimensions": {
+        "function": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "state": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "integration": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "security": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "performance": {
+          "status": "NOT_APPLICABLE",
+          "reason": "This story defines an evidence/governance boundary, not a latency or throughput target."
+        },
+        "maintainability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "observability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "testing": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "user_value": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "external_compatibility": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        }
+      },
+      "evidence": [],
+      "blockers": [
+        "independent external adoption or execution evidence missing"
+      ]
+    },
+    {
+      "id": "US-14",
+      "title": "Rust regression on latest head",
+      "depends_on": [
+        "US-03",
+        "US-04",
+        "US-05",
+        "US-06",
+        "US-09",
+        "US-10"
+      ],
+      "impacts": [
+        "US-07"
+      ],
+      "priority": "P0",
+      "status": "PARTIAL",
+      "vertical_acceptance": "NOT_VERIFIED",
+      "horizontal_acceptance": "NOT_VERIFIED",
+      "dimensions": {
+        "function": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "state": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "integration": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "security": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "performance": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "maintainability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "observability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "testing": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "user_value": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "external_compatibility": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        }
+      },
+      "evidence": [],
+      "blockers": []
+    },
+    {
+      "id": "US-15",
+      "title": "feature scope honesty",
+      "depends_on": [
+        "US-07",
+        "US-08"
+      ],
+      "impacts": [
+        "US-13"
+      ],
+      "priority": "P1",
+      "status": "PARTIAL",
+      "vertical_acceptance": "NOT_VERIFIED",
+      "horizontal_acceptance": "NOT_VERIFIED",
+      "dimensions": {
+        "function": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "state": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "integration": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "security": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "performance": {
+          "status": "NOT_APPLICABLE",
+          "reason": "This story defines an evidence/governance boundary, not a latency or throughput target."
+        },
+        "maintainability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "observability": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "testing": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "user_value": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        },
+        "external_compatibility": {
+          "status": "PARTIAL",
+          "reason": "Requires current-commit execution or independent acceptance evidence."
+        }
+      },
+      "evidence": [],
+      "blockers": []
+    }
+  ]
+}
