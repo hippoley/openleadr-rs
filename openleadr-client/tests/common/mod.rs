@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use axum::body::Body;
 use http_body_util::BodyExt;
-use openleadr_client::{Client, ClientCredentials, ClientKind, HttpClient, ProgramClient};
+use openleadr_client::{Client, ClientCredentials, ClientKind, HttpClient, ProgramClient, TokenEndpointAuthMethod};
 use openleadr_vtn::{VtnConfig, data_source::PostgresStorage, state::AppState};
 use openleadr_wire::program::ProgramRequest;
 use reqwest::{Method, RequestBuilder, Response};
@@ -231,7 +231,11 @@ pub fn setup_url_client<K: ClientKind>(url: Url) -> Client<K> {
 }
 
 pub fn setup_url_client_with_role<K: ClientKind>(url: Url, role: AuthRole) -> Client<K> {
-    Client::with_url(url, Some(external_vtn_credentials(role)))
+    let mut credentials = external_vtn_credentials(role);
+    if std::env::var("OPENLEADR_RS_TOKEN_AUTH_METHOD").as_deref() == Ok("client_secret_post") {
+        credentials = credentials.with_token_endpoint_auth_method(TokenEndpointAuthMethod::ClientSecretPost);
+    }
+    Client::with_url(url, Some(credentials))
 }
 
 pub async fn setup_client<K: ClientKind>(db: PgPool) -> Client<K> {
