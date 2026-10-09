@@ -6,14 +6,14 @@
 use openleadr_client::BusinessLogic;
 use openleadr_wire::{event::EventRequest, program::ProgramRequest};
 use uuid::Uuid;
-use serial_test::serial;
+use serial_test::file_serial;
 
 mod common;
 #[path = "external_mutation_guard.rs"]
 mod external_mutation_guard;
 
 #[tokio::test]
-#[serial]
+#[file_serial(openleadr_external_vtn)]
 #[ignore = "destructive live VTN test; requires isolated server and explicit authorization"]
 async fn event_lifecycle_without_local_database() {
     let url = external_mutation_guard::authorized_mutation_url();
