@@ -25,7 +25,9 @@ jobs:
       - name: Validate assurance profiles
         run: python3 openleadr-client/tests/validate_assurance_profiles.py
       - name: Syntax-check external VTN evidence runner
-        run: bash -n openleadr-client/tests/run_external_vtn_evidence.sh
+        run: |
+          bash -n openleadr-client/tests/run_external_vtn_evidence.sh
+          bash -n openleadr-client/tests/run_external_vtn_parallel_isolation.sh
       - name: Compile assurance probe plans
         run: |
           python3 openleadr-client/tests/compile_assurance_probes.py \
