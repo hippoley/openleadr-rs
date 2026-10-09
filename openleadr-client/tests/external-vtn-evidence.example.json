@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.9.0",
+  "schema_version": "0.9.1",
   "source_commit": "0000000000000000000000000000000000000000",
   "vtn": {
     "implementation": "REPLACE_WITH_VTN_IMPLEMENTATION",
@@ -78,5 +78,19 @@
       "remaining_resources": 0,
       "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     }
-  ]
+  ],
+  "parallel_isolation": {
+    "runner_a": {
+      "process_label": "runner-a",
+      "command": "bash openleadr-client/tests/run_external_vtn_parallel_isolation.sh",
+      "exit_code": -1,
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "runner_b": {
+      "process_label": "runner-b",
+      "command": "bash openleadr-client/tests/run_external_vtn_parallel_isolation.sh",
+      "exit_code": -1,
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
 }
