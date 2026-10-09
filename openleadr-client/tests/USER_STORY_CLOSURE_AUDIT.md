@@ -75,3 +75,13 @@ Machine-readable baseline: `user-story-horizontal-matrix.json`. It enumerates US
 | H-003 | P1 | US-01..15 | No machine-readable ten-dimensional matrix or cross-story dependency gate | IMPLEMENTED: matrix, validator, adversarial tests; latest CI pending |
 | H-004 | P1 | US-06/14 | Multi-process runner exists but independent concurrent execution and performance targets unverified | PARTIAL |
 
+
+## External-component fit and cross-test isolation — 2026-10-09
+
+A documented second OpenADR 3.1 implementation, `hupe1980/openadr`, provides a candidate single-binary VTN with SQLite and OAuth2 BL/VEN clients. `INDEPENDENT_VTN_CANDIDATE.md` records a disposable test recipe and requires verification of version, upstream license, feature flags, protocol compatibility, auth semantics, and real execution **before adoption**. No dependency was added and no independent run is claimed.
+
+| ID | Severity | Stories | Defect | Fix | Acceptance |
+| --- | --- | --- | --- | --- | --- |
+| H-005 | P1 | US-02/06/14 | Tests in shared `common/mod.rs` changed process-global environment variables, risking cross-test interference despite per-test serial annotations | `5e3f9c2` extracted pure credential/fault policy tests; `8ddba8d` kept Rust toolchain compatibility | latest CI pending |
+| H-006 | P0 | US-01..08 | No pinned, documented candidate independent VTN execution path | `5062ed8` documented external VTN adapter and strict acceptance boundary without vendoring code | independent execution and license/version inspection still required |
+
