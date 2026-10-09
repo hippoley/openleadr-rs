@@ -1,9 +1,10 @@
 use axum::http::StatusCode;
+use futures::FutureExt;
 use openleadr_client::{BusinessLogic, Error, Filter, PaginationOptions, VirtualEndNode};
 use openleadr_wire::{program::ProgramRequest, target::Target};
 use serial_test::serial;
 use sqlx::PgPool;
-use std::str::FromStr;
+use std::{panic::AssertUnwindSafe, str::FromStr};
 
 mod common;
 
@@ -22,33 +23,55 @@ fn default_content() -> ProgramRequest {
 #[serial]
 async fn program_crud() {
     let ctx = common::setup::<BusinessLogic>(common::AuthRole::Bl).await;
-    // Unique names prevent test runs from deleting another runner's resources.
     let run_id = uuid::Uuid::new_v4();
     let original_name = format!("program-crud-test-{run_id}");
     let updated_name = format!("program-crud-test-updated-{run_id}");
+    let mut created_id = None;
 
-    let content = ProgramRequest {
-        program_name: original_name.clone(),
-        ..default_content()
+    let outcome = AssertUnwindSafe(async {
+        let content = ProgramRequest {
+            program_name: original_name.clone(),
+            ..default_content()
+        };
+        let created = ctx.create_program(content.clone()).await.unwrap();
+        created_id = Some(created.id().clone());
+        assert_eq!(created.content(), &content);
+
+        let err = ctx.create_program(content).await.unwrap_err();
+        assert!(err.is_conflict());
+
+        let mut program = ctx.get_program_by_id(created.id()).await.unwrap();
+        assert_eq!(program.content(), created.content());
+
+        program.content_mut().program_name = updated_name.clone();
+        program.update().await.unwrap();
+        let updated = ctx.get_program_by_id(program.id()).await.unwrap();
+        assert_eq!(updated.content().program_name, updated_name);
+
+        program.delete().await.unwrap();
+    })
+    .catch_unwind()
+    .await;
+
+    let cleanup_error = if let Some(id) = created_id {
+        match ctx.get_program_by_id(&id).await {
+            Ok(program) => program.delete().await.err(),
+            Err(err) if err.is_not_found() => None,
+            Err(err) => Some(err),
+        }
+    } else {
+        None
     };
-    let created = ctx.create_program(content.clone()).await.unwrap();
-    assert_eq!(created.content(), &content);
 
-    let err = ctx.create_program(content).await.unwrap_err();
-    assert!(err.is_conflict());
-
-    let mut program = ctx.get_program_by_id(created.id()).await.unwrap();
-    assert_eq!(program.content(), created.content());
-
-    program.content_mut().program_name = updated_name.clone();
-    program.update().await.unwrap();
-    let updated = ctx.get_program_by_id(program.id()).await.unwrap();
-    assert_eq!(updated.content().program_name, updated_name);
-
-    let id = program.id().clone();
-    program.delete().await.unwrap();
-    let err = ctx.get_program_by_id(&id).await.unwrap_err();
-    assert!(err.is_not_found());
+    if let Err(payload) = outcome {
+        if let Some(err) = cleanup_error {
+            eprintln!("cleanup after program_crud failure also failed: {err}");
+        }
+        std::panic::resume_unwind(payload);
+    }
+    if let Some(err) = cleanup_error {
+        panic!("program_crud cleanup failed: {err}");
+    }
 }
 
 #[sqlx::test(fixtures("users"))]
