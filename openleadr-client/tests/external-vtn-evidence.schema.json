@@ -14,7 +14,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "0.4.0"
+      "const": "0.5.0"
     },
     "source_commit": {
       "type": "string",
@@ -228,6 +228,55 @@
           }
         }
       }
+    },
+    "fault_injection": {
+      "type": "array",
+      "description": "Negative experiments that intentionally fail after remote resource creation. These are separate from passing CRUD tests and cannot satisfy a strong claim by themselves.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "command",
+          "expected_nonzero_exit",
+          "observed_exit_code",
+          "cleanup_verified",
+          "remaining_resources"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "command": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expected_nonzero_exit": {
+            "const": true
+          },
+          "observed_exit_code": {
+            "type": "integer",
+            "not": {
+              "const": 0
+            }
+          },
+          "cleanup_verified": {
+            "type": "boolean"
+          },
+          "remaining_resources": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "log_sha256": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
     }
   },
   "allOf": [
@@ -247,7 +296,8 @@
       },
       "then": {
         "required": [
-          "effect_verification"
+          "effect_verification",
+          "fault_injection"
         ],
         "properties": {
           "vtn": {
@@ -326,6 +376,23 @@
               },
               "required": [
                 "exit_code"
+              ]
+            }
+          },
+          "fault_injection": {
+            "minItems": 1,
+            "items": {
+              "properties": {
+                "cleanup_verified": {
+                  "const": true
+                },
+                "remaining_resources": {
+                  "const": 0
+                }
+              },
+              "required": [
+                "cleanup_verified",
+                "remaining_resources"
               ]
             }
           }
