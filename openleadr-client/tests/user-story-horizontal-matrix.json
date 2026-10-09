@@ -448,7 +448,7 @@
       "id": "US-08",
       "title": "evidence claim ceiling",
       "depends_on": [
-        "US-07"
+        "US-09"
       ],
       "impacts": [
         "US-13"
@@ -688,44 +688,44 @@
       "horizontal_acceptance": "NOT_VERIFIED",
       "dimensions": {
         "function": {
-          "status": "PARTIAL",
-          "reason": "Requires current-commit execution or independent acceptance evidence."
+          "status": "NOT_APPLICABLE",
+          "reason": "A2A upstream adoption is outside the OpenADR Rust repository product scope; tracked only as a research handoff."
         },
         "state": {
-          "status": "PARTIAL",
-          "reason": "Requires current-commit execution or independent acceptance evidence."
+          "status": "NOT_APPLICABLE",
+          "reason": "A2A upstream adoption is outside the OpenADR Rust repository product scope; tracked only as a research handoff."
         },
         "integration": {
-          "status": "PARTIAL",
-          "reason": "Requires current-commit execution or independent acceptance evidence."
+          "status": "NOT_APPLICABLE",
+          "reason": "A2A upstream adoption is outside the OpenADR Rust repository product scope; tracked only as a research handoff."
         },
         "security": {
-          "status": "PARTIAL",
-          "reason": "Requires current-commit execution or independent acceptance evidence."
+          "status": "NOT_APPLICABLE",
+          "reason": "A2A upstream adoption is outside the OpenADR Rust repository product scope; tracked only as a research handoff."
         },
         "performance": {
           "status": "NOT_APPLICABLE",
-          "reason": "This story defines an evidence/governance boundary, not a latency or throughput target."
+          "reason": "A2A upstream adoption is outside the OpenADR Rust repository product scope; tracked only as a research handoff."
         },
         "maintainability": {
-          "status": "PARTIAL",
-          "reason": "Requires current-commit execution or independent acceptance evidence."
+          "status": "NOT_APPLICABLE",
+          "reason": "A2A upstream adoption is outside the OpenADR Rust repository product scope; tracked only as a research handoff."
         },
         "observability": {
-          "status": "PARTIAL",
-          "reason": "Requires current-commit execution or independent acceptance evidence."
+          "status": "NOT_APPLICABLE",
+          "reason": "A2A upstream adoption is outside the OpenADR Rust repository product scope; tracked only as a research handoff."
         },
         "testing": {
-          "status": "PARTIAL",
-          "reason": "Requires current-commit execution or independent acceptance evidence."
+          "status": "NOT_APPLICABLE",
+          "reason": "A2A upstream adoption is outside the OpenADR Rust repository product scope; tracked only as a research handoff."
         },
         "user_value": {
-          "status": "PARTIAL",
-          "reason": "Requires current-commit execution or independent acceptance evidence."
+          "status": "NOT_APPLICABLE",
+          "reason": "A2A upstream adoption is outside the OpenADR Rust repository product scope; tracked only as a research handoff."
         },
         "external_compatibility": {
-          "status": "PARTIAL",
-          "reason": "Requires current-commit execution or independent acceptance evidence."
+          "status": "NOT_APPLICABLE",
+          "reason": "A2A upstream adoption is outside the OpenADR Rust repository product scope; tracked only as a research handoff."
         }
       },
       "evidence": [],
