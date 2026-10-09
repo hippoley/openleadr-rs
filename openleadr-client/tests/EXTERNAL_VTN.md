@@ -303,7 +303,24 @@ This pair is stronger than treating either bug as a product-specific defect. It 
 
 This does **not** imply that every Gateway API condition requires an end-to-end probe. The reusable claim is limited to obligations that assert externally effective programming or rejection.
 
-## Evidence v0.6 strong-claim coverage
+
+## One-command evidence capture
+
+After configuring a disposable independent VTN and the BL credentials, run:
+
+```sh
+bash openleadr-client/tests/run_external_vtn_evidence.sh
+```
+
+The runner executes both normal CRUD tests and both deliberate post-create
+fault injections, retains each redacted command log locally, and prints the
+observed exit code plus SHA-256 digest. It intentionally does **not** mark
+remote cleanup or effect verification as successful: inspect the independent
+VTN separately and populate the v0.7 evidence artifact only from those
+observations. This separation prevents the system under test from certifying
+its own external effect.
+
+## Evidence v0.7 strong-claim coverage
 
 A strong `independent-vtn-crud` or `interoperability-candidate` claim
 requires **both** successful normal tests (`program_crud`, `event_crud`)
