@@ -14,7 +14,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "0.7.0"
+      "const": "0.8.0"
     },
     "source_commit": {
       "type": "string",
@@ -91,7 +91,8 @@
             "minLength": 1,
             "enum": [
               "program_crud",
-              "event_crud"
+              "event_crud",
+              "ven_role_cannot_create_program"
             ]
           },
           "command": {
@@ -368,7 +369,7 @@
             ]
           },
           "tests": {
-            "minItems": 2,
+            "minItems": 3,
             "allOf": [
               {
                 "contains": {
@@ -393,6 +394,24 @@
                   "properties": {
                     "name": {
                       "const": "event_crud"
+                    },
+                    "exit_code": {
+                      "const": 0
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "exit_code"
+                  ]
+                },
+                "minContains": 1,
+                "maxContains": 1
+              },
+              {
+                "contains": {
+                  "properties": {
+                    "name": {
+                      "const": "ven_role_cannot_create_program"
                     },
                     "exit_code": {
                       "const": 0
