@@ -31,3 +31,11 @@ The repository currently retains **two non-equivalent 16-case datasets**: `cases
 Remote source-level crosswalk evaluation found **3 canonical unmapped cases** (B008 journal durability, B009 duplicate journal rejection, B016 denied-role test) and **3 secondary unmapped cases** (embedded-secret URL rejection, Program list, Event list). The post-correction mapping has no many-to-one references. These are **coverage reconciliation gaps**, not failed live VTN test outcomes.
 
 Run `python3 benchmarks/issue53/audit_crosswalk.py` to see these gaps. The script deliberately exposes `joint_pass_count: null` and `joint_verified_closed: false`: a relationship between cases does not authorize aggregating or deduplicating real execution evidence. Next priority: establish one canonical, executable, versioned case schema and per-case runner mappings with a migration test before removing either legacy manifest. No Rust or external VTN pass is claimed here.
+
+### External runner integration — cargo-nextest + JUnit oracle (October 2026)
+
+The real-process `upstream-vtn-e2e.yml` now reuses **cargo-nextest**, the same external Rust runner family already used by this repository's `checks.yml`. It executes exactly the two `#[ignore]` HTTP/OAuth read-only VTN tests with `--run-ignored only --no-tests fail --test-threads 1`. Its `issue53` profile emits standard JUnit XML (`target/nextest/issue53/junit.xml`), not a free-form string-only success claim.
+
+`verify_junit.py` independently reads the JUnit data; missing, duplicate, failed or skipped Program/Event tests reject the E2E claim. The workflow captures the tested commit SHA, JUnit SHA-256, client/server logs, and a JSON receipt through `actions/upload-artifact`. Python negative-case tests live in `test_verify_junit.py` and run under the preexisting benchmark unittest CI step.
+
+Scope remains intentionally restricted: **two read-only calls against the in-tree VTN running as a separate process**, *not* independent third-party interoperability; no CRUD, mutation, cleanup, fault injection or full certification is claimed. The public GitHub Actions run must finish successfully before even this limited E2E is marked executed/passed. Artifact logs and CI should be reviewed for sensitive values before sharing elsewhere.
