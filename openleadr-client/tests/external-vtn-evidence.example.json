@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.8.0",
+  "schema_version": "0.9.0",
   "source_commit": "0000000000000000000000000000000000000000",
   "vtn": {
     "implementation": "REPLACE_WITH_VTN_IMPLEMENTATION",
@@ -27,6 +27,12 @@
     {
       "name": "ven_role_cannot_create_program",
       "command": "cargo test -p openleadr-client --test program ven_role_cannot_create_program -- --exact --nocapture",
+      "exit_code": -1,
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "concurrent_program_runs_do_not_cross_delete",
+      "command": "cargo test -p openleadr-client --test program concurrent_program_runs_do_not_cross_delete -- --exact --nocapture",
       "exit_code": -1,
       "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     }
