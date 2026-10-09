@@ -60,9 +60,15 @@ async fn event_lifecycle_without_local_database() {
     } else {
         Ok(())
     };
-    let parent_cleanup = match client.get_program_by_id(&program_id).await {
-        Ok(p) => p.delete().await.map(|_| ()).map_err(|e| format!("{e:?}")),
-        Err(err) => Err(format!("cannot fetch parent for cleanup: {err:?}")),
+    // Never remove the parent when its Event cleanup failed. This preserves
+    // the relationship needed for later recovery and avoids hiding orphans.
+    let parent_cleanup = if event_cleanup.is_ok() {
+        match client.get_program_by_id(&program_id).await {
+            Ok(p) => p.delete().await.map(|_| ()).map_err(|e| format!("{e:?}")),
+            Err(err) => Err(format!("cannot fetch parent for cleanup: {err:?}")),
+        }
+    } else {
+        Err("parent deletion withheld: child cleanup failed".to_owned())
     };
 
     assert!(
