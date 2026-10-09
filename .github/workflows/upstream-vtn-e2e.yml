@@ -29,6 +29,8 @@ jobs:
           --health-retries 12
     env:
       DATABASE_URL: postgres://openadr:openadr@localhost:5432/openadr
+      OAUTH_TOKEN_URL: http://127.0.0.1:3000/auth/token
+      OAUTH_VALID_AUDIENCES: http://127.0.0.1:3000
       OPENLEADR_RS_VTN_URL: http://127.0.0.1:3000/
       OPENLEADR_RS_CLIENT_ID: bl-client
       OPENLEADR_RS_CLIENT_SECRET: bl-client
@@ -69,6 +71,8 @@ jobs:
             sleep 2
           done
           if [ "$ready" -ne 1 ]; then cat vtn.log; exit 1; fi
+          sleep 2
+          kill -0 "$(cat vtn.pid)" || { cat vtn.log; exit 1; }
       - name: Execute real network Program and Event list
         run: |
           set -o pipefail
