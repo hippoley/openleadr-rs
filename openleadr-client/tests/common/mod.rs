@@ -267,6 +267,57 @@ pub async fn setup_client_with_role<K: ClientKind>(db: PgPool, role: AuthRole) -
 }
 
 #[cfg(test)]
+mod external_credential_tests {
+    use super::{external_vtn_credentials, AuthRole};
+    use serial_test::serial;
+
+    fn clear() {
+        for name in [
+            "OPENLEADR_RS_REQUIRE_EXTERNAL_VTN",
+            "OPENLEADR_RS_BL_CLIENT_ID",
+            "OPENLEADR_RS_BL_CLIENT_SECRET",
+            "OPENLEADR_RS_VEN_CLIENT_ID",
+            "OPENLEADR_RS_VEN_CLIENT_SECRET",
+            "OPENLEADR_RS_CLIENT_ID",
+            "OPENLEADR_RS_CLIENT_SECRET",
+        ] {
+            unsafe { std::env::remove_var(name) };
+        }
+    }
+
+    #[test]
+    #[serial]
+    #[should_panic(expected = "External-only test mode requires non-empty OPENLEADR_RS_BL_CLIENT_ID")]
+    fn strict_external_bl_rejects_missing_credentials() {
+        clear();
+        unsafe { std::env::set_var("OPENLEADR_RS_REQUIRE_EXTERNAL_VTN", "1") };
+        let _ = external_vtn_credentials(AuthRole::Bl);
+    }
+
+    #[test]
+    #[serial]
+    #[should_panic(expected = "External-only test mode requires non-empty OPENLEADR_RS_VEN_CLIENT_ID")]
+    fn strict_external_ven_rejects_missing_credentials() {
+        clear();
+        unsafe { std::env::set_var("OPENLEADR_RS_REQUIRE_EXTERNAL_VTN", "1") };
+        let _ = external_vtn_credentials(AuthRole::Ven);
+    }
+
+    #[test]
+    #[serial]
+    #[should_panic(expected = "External-only test mode requires non-empty OPENLEADR_RS_BL_CLIENT_ID")]
+    fn strict_external_rejects_blank_credentials() {
+        clear();
+        unsafe {
+            std::env::set_var("OPENLEADR_RS_REQUIRE_EXTERNAL_VTN", "1");
+            std::env::set_var("OPENLEADR_RS_BL_CLIENT_ID", "   ");
+            std::env::set_var("OPENLEADR_RS_BL_CLIENT_SECRET", "secret");
+        }
+        let _ = external_vtn_credentials(AuthRole::Bl);
+    }
+}
+
+#[cfg(test)]
 mod fault_injection_tests {
     use super::should_inject_failure_after_create;
 
