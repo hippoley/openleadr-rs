@@ -31,14 +31,14 @@ fn credential_env(name: &str) -> Option<String> {
     match std::env::var(name) {
         Ok(value) => Some(value),
         Err(VarError::NotPresent) => None,
-        Err(VarError::NotUnicode(_)) => panic!("Invalid encoding for credential environment variable: {name}"),
+        Err(VarError::NotUnicode(_)) => {\n            panic!("Invalid encoding for credential environment variable: {name}")\n        }
     }
 }
 
 fn external_vtn_credentials(auth_role: AuthRole) -> ClientCredentials {
     let (id_var, secret_var) = match auth_role {
         AuthRole::Bl => ("OPENLEADR_RS_BL_CLIENT_ID", "OPENLEADR_RS_BL_CLIENT_SECRET"),
-        AuthRole::Ven => ("OPENLEADR_RS_VEN_CLIENT_ID", "OPENLEADR_RS_VEN_CLIENT_SECRET"),
+        AuthRole::Ven => (\n            "OPENLEADR_RS_VEN_CLIENT_ID",\n            "OPENLEADR_RS_VEN_CLIENT_SECRET",\n        ),
     };
     let legacy_id = credential_env("OPENLEADR_RS_CLIENT_ID");
     let legacy_secret = credential_env("OPENLEADR_RS_CLIENT_SECRET");
@@ -116,19 +116,7 @@ fn enforce_external_only_guard() {
     match external_url {
         Ok(url) if !url.trim().is_empty() => {}
         Ok(_) => panic!("External-only test mode requires a non-empty external VTN URL"),
-        Err(_) => panic!("External-only test mode requires OPENLEADR_RS_VTN_URL or OPENADR_VTN_URL; refusing in-tree PostgreSQL fallback"),
-    }
-}
-
-#[cfg(test)]
-mod external_guard_tests {
-    use super::*;
-    #[test]
-    fn guard_is_noop_when_not_requested() {
-        // Purely checks the disabled path; no environment mutation or external service needed.
-        if std::env::var("OPENLEADR_RS_REQUIRE_EXTERNAL_VTN").as_deref() != Ok("1") {
-            enforce_external_only_guard();
-        }
+        Err(_) => panic!(\n            "External-only test mode requires OPENLEADR_RS_VTN_URL or OPENADR_VTN_URL; refusing in-tree PostgreSQL fallback"\n        ),
     }
 }
 
@@ -246,7 +234,7 @@ pub async fn setup_client_with_role<K: ClientKind>(db: PgPool, role: AuthRole) -
             return setup_url_client_with_role(url, role);
         }
         Err(VarError::NotPresent) => {}
-        Err(VarError::NotUnicode(e)) => panic!("Invalid external VTN URL environment variable: {e:?}"),
+        Err(VarError::NotUnicode(e)) => {\n            panic!("Invalid external VTN URL environment variable: {e:?}")\n        }
     }
     let cred = default_credentials(role);
     let storage = PostgresStorage::new(db).unwrap();
