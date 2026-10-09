@@ -39,8 +39,8 @@
     },
     {
       "json_id": "B008",
-      "jsonl_id": "process_crash_after_create",
-      "relation": "partial"
+      "jsonl_id": null,
+      "relation": "unmapped"
     },
     {
       "json_id": "B009",
