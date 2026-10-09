@@ -26,6 +26,7 @@ echo "# normal CRUD: expected exit 0"
 run_capture program_crud cargo test -p openleadr-client --test program program_crud -- --exact --nocapture
 run_capture event_crud cargo test -p openleadr-client --test event event_crud -- --exact --nocapture
 run_capture ven_role_cannot_create_program cargo test -p openleadr-client --test program ven_role_cannot_create_program -- --exact --nocapture
+run_capture concurrent_program_runs_do_not_cross_delete cargo test -p openleadr-client --test program concurrent_program_runs_do_not_cross_delete -- --exact --nocapture
 
 echo "# deliberate post-create failures: expected nonzero; cleanup must be verified remotely"
 export OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE=1
