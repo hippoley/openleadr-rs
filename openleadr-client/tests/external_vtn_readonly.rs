@@ -62,7 +62,7 @@ async fn external_vtn_can_list_programs_without_local_database() {
 async fn external_vtn_can_list_events_without_local_database() {
     let client = common::setup_url_client::<BusinessLogic>(configured_external_vtn());
     let events = client
-        .get_event_list(Filter::none())
+        .get_event_list(None, Filter::none())
         .await
         .expect("external VTN Event list request failed");
     eprintln!(
