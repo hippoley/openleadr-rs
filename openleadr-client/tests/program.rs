@@ -50,6 +50,50 @@ async fn ven_role_cannot_create_program() {
 
 #[tokio::test]
 #[serial]
+async fn concurrent_program_runs_do_not_cross_delete() {
+    let ctx = common::setup::<BusinessLogic>(common::AuthRole::Bl).await;
+    let run_a = uuid::Uuid::new_v4();
+    let run_b = uuid::Uuid::new_v4();
+
+    let program_a = ctx
+        .create_program(ProgramRequest {
+            program_name: format!("isolation-a-{run_a}"),
+            ..default_content()
+        })
+        .await
+        .unwrap();
+    let program_b = ctx
+        .create_program(ProgramRequest {
+            program_name: format!("isolation-b-{run_b}"),
+            ..default_content()
+        })
+        .await
+        .unwrap();
+
+    let id_a = program_a.id().clone();
+    let id_b = program_b.id().clone();
+
+    program_a.delete().await.unwrap();
+
+    assert!(
+        ctx.get_program_by_id(&id_a).await.unwrap_err().is_not_found(),
+        "run A resource must be deleted"
+    );
+    let surviving_b = ctx
+        .get_program_by_id(&id_b)
+        .await
+        .expect("run A cleanup must not delete run B resource");
+    assert_eq!(surviving_b.content().program_name, format!("isolation-b-{run_b}"));
+
+    surviving_b.delete().await.unwrap();
+    assert!(
+        ctx.get_program_by_id(&id_b).await.unwrap_err().is_not_found(),
+        "run B cleanup must delete only its own resource"
+    );
+}
+
+#[tokio::test]
+#[serial]
 async fn program_crud() {
     let ctx = common::setup::<BusinessLogic>(common::AuthRole::Bl).await;
     let run_id = uuid::Uuid::new_v4();
