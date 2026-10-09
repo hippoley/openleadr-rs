@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Bindings show source-level test entry points, NOT executed evidence. partial != passed; absent is an explicit implementation gap.",
+  "bindings": [
+    {
+      "id": "B001",
+      "path": "openleadr-client/tests/external_mutation_guard.rs",
+      "test": "accepts_explicit_dedicated_https_target",
+      "gate": "local",
+      "coverage": "partial"
+    },
+    {
+      "id": "B002",
+      "path": "openleadr-client/tests/external_mutation_guard.rs",
+      "test": "rejects_missing_or_incorrect_authorization",
+      "gate": "local",
+      "coverage": "partial"
+    },
+    {
+      "id": "B003",
+      "path": "openleadr-client/tests/external_mutation_guard.rs",
+      "test": "rejects_unsafe_targets_and_missing_credentials",
+      "gate": "local",
+      "coverage": "partial"
+    },
+    {
+      "id": "B004",
+      "path": "openleadr-client/tests/external_vtn_program_crud.rs",
+      "test": "program_create_read_update_delete_without_pgpool",
+      "gate": "live",
+      "coverage": "exact"
+    },
+    {
+      "id": "B005",
+      "path": null,
+      "test": null,
+      "gate": "fault",
+      "coverage": "absent"
+    },
+    {
+      "id": "B006",
+      "path": "openleadr-client/tests/external_vtn_event_crud.rs",
+      "test": "event_lifecycle_without_local_database",
+      "gate": "live",
+      "coverage": "exact"
+    },
+    {
+      "id": "B007",
+      "path": null,
+      "test": null,
+      "gate": "fault",
+      "coverage": "absent"
+    },
+    {
+      "id": "B008",
+      "path": null,
+      "test": null,
+      "gate": "local",
+      "coverage": "absent"
+    },
+    {
+      "id": "B009",
+      "path": null,
+      "test": null,
+      "gate": "local",
+      "coverage": "absent"
+    },
+    {
+      "id": "B010",
+      "path": null,
+      "test": null,
+      "gate": "fault",
+      "coverage": "absent"
+    },
+    {
+      "id": "B011",
+      "path": null,
+      "test": null,
+      "gate": "concurrency",
+      "coverage": "absent"
+    },
+    {
+      "id": "B012",
+      "path": null,
+      "test": null,
+      "gate": "concurrency",
+      "coverage": "absent"
+    },
+    {
+      "id": "B013",
+      "path": null,
+      "test": null,
+      "gate": "external",
+      "coverage": "absent"
+    },
+    {
+      "id": "B014",
+      "path": null,
+      "test": null,
+      "gate": "regression",
+      "coverage": "absent"
+    },
+    {
+      "id": "B015",
+      "path": null,
+      "test": null,
+      "gate": "fault",
+      "coverage": "absent"
+    },
+    {
+      "id": "B016",
+      "path": null,
+      "test": null,
+      "gate": "external",
+      "coverage": "absent"
+    }
+  ]
+}
