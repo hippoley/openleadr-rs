@@ -69,7 +69,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 "$DATABASE_URL" < fixtures/users.sql
       - name: Start actual in-tree VTN as independent server process
         run: |
-          cargo run -p openleadr-vtn > "$RUNNER_TEMP/vtn-server.log" 2>&1 &
+          cargo run -p openleadr-vtn --features internal-oauth > "$RUNNER_TEMP/vtn-server.log" 2>&1 &
           echo $! > "$RUNNER_TEMP/vtn-server.pid"
           for i in $(seq 1 90); do
             if curl --silent --output /dev/null --connect-timeout 1 http://127.0.0.1:3000/programs; then
