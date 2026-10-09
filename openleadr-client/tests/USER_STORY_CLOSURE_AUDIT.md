@@ -57,3 +57,21 @@ Keep this branch focused on closing OpenADR interoperability and evidence truthf
 | D-003 | P1 | US-06 | UUID ownership alone did not prove multi-process isolation | ownership regression plus two-process external runner added | local contract present; independent execution pending |
 | D-004 | P1 | US-10 | mixed-scope fail-closed behavior existed in validator/compiler but had no dedicated discovered regression test | added profile-boundary tests and widened CI discovery pattern | latest branch CI pending |
 
+
+## Horizontal completeness audit — 2026-10-09
+
+Machine-readable baseline: `user-story-horizontal-matrix.json`. It enumerates US-01..US-15 and ten dimensions (function, state, integration, security, performance, maintainability, observability, testing, user value, external compatibility), with rationale for N/A, dependencies, impacts, and both acceptance layers. `validate_user_story_matrix.py` rejects missing stories, cycles, unsupported statuses, unjustified N/A, and any `VERIFIED_CLOSED` lacking applicable-dimension verification, both acceptance layers, evidence, and independent acceptance. `test_assurance_horizontal_closure.py` contains negative counterexamples. CI runs both tests and matrix validation.
+
+**Conservative audit rule:** historical CI success does not establish latest-head or cross-system verification. All machine-matrix stories remain non-closed until current-commit acceptance and independent evidence are recorded; this does not erase prior verified subcomponents.
+
+**External standards comparison:** OpenADR Alliance's official 3.x certification requires its online test tool and certification process. Our external VTN harness and JSON Schema are supplementary, bounded interoperability evidence, **not** Alliance certification. Official specification and certification pages: https://www.openadr.org/specification and https://www.openadr.org/openadr-3-certification . Public OpenADR 3.1.0 spec copy https://github.com/grid-coordination/openadr3-specification records upstream provenance and per-artifact licensing; reuse must respect the Alliance's separate document copyright. Do not vendor copyrighted guide/definition material merely to expand test coverage.
+
+**Highest-value remaining horizontal gap:** end-to-end independent VTN execution and independently observed cleanup/effects (US-01..08). Performance and scale acceptance remain unquantified for operational tests; do not label those dimensions verified without an agreed target. US-11 remains blocked on upstream normative decision, US-12 remains outside this repository, US-13 requires actual third-party adoption. Avoid adding a second framework before one real cross-implementation witness exists.
+
+| ID | Severity | Linked stories | Horizontal defect | Status |
+| --- | --- | --- | --- | --- |
+| H-001 | P0 | US-01..08 | Code/contract pass cannot establish independent external effect or remote cleanup | BLOCKED: independent target and observer evidence missing |
+| H-002 | P0 | US-07/08/13 | Schema-valid operator declarations could be mistaken for official OpenADR certification | MITIGATED: explicit non-certification boundary; external proof still missing |
+| H-003 | P1 | US-01..15 | No machine-readable ten-dimensional matrix or cross-story dependency gate | IMPLEMENTED: matrix, validator, adversarial tests; latest CI pending |
+| H-004 | P1 | US-06/14 | Multi-process runner exists but independent concurrent execution and performance targets unverified | PARTIAL |
+
