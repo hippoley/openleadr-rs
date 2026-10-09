@@ -25,7 +25,7 @@ def get_json(url):
             raise ValueError(f"GET {url}: not JSON")
         return json.load(response)
 
-def preflight(base, fetch=get_json):
+def preflight(base, fetch=get_json, require_openapi=False):
     base=check_base(base)
     auth=fetch(base+"/auth/server")
     if not isinstance(auth,dict) or not isinstance(auth.get("tokenURL"),str):
@@ -47,7 +47,7 @@ def preflight(base, fetch=get_json):
     if not any(path.endswith("/events") for path in paths):
         raise ValueError("OpenAPI document lacks Event collection")
     return {"target":base,"token_endpoint_discovered":True,
-            "program_path_present":True,"event_path_present":True,
+            "openapi_checked":require_openapi,
             "note":"Read-only discovery only; not interoperability or certification."}
 
 if __name__=="__main__":
@@ -55,7 +55,7 @@ if __name__=="__main__":
         url=os.environ.get("OPENLEADR_RS_VTN_URL") or os.environ.get("OPENADR_VTN_URL")
         if not url:
             raise ValueError("OPENLEADR_RS_VTN_URL or OPENADR_VTN_URL required")
-        print(json.dumps(preflight(url),indent=2))
+        print(json.dumps(preflight(url, require_openapi=os.environ.get("OPENLEADR_RS_REQUIRE_OPENAPI") == "1"),indent=2))
     except (ValueError,urllib.error.URLError,TimeoutError,KeyError,TypeError) as exc:
         print(f"external VTN preflight failed: {exc}",file=sys.stderr)
         sys.exit(1)
