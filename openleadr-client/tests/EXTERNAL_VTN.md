@@ -50,8 +50,8 @@ It would **not** prove full OpenADR compliance, VEN role authorization, all reso
 
 ## Known limitations before upstream submission
 
-1. The focused Program and Event CRUD tests now use per-run UUID-based names and do not pre-delete similarly named resources. This reduces name collisions, but does not guarantee isolation from other test runners or resource cleanup after failures. Use a dedicated environment.
-2. Cleanup occurs on the normal success path; an assertion failure or panic can leave test resources behind. A cleanup-on-failure design is still required.
+1. The focused Program and Event CRUD tests use per-run UUID-based names and do not pre-delete similarly named resources. This reduces name collisions, but does not guarantee cross-process isolation from other runners. Use a dedicated environment.
+2. Cleanup-on-unwind is implemented for the focused Program/Event CRUD tests: created IDs are retained, resources are re-read after the protected test body, and surviving resources are deleted before the original panic is resumed. Repository CI verifies that this implementation builds and passes ordinary tests, but a deliberately injected mid-CRUD failure has **not** yet demonstrated zero residual resources on an independent VTN. Treat failure cleanup as implemented-but-not-externally-proven.
 3. Existing SQLx-backed integration tests are not all converted to remote-only tests. Run the focused commands above; a full `cargo test` may still require PostgreSQL.
 4. No real third-party VTN run, CI result, or maintainer acceptance is asserted by this document. Record the VTN implementation/version, runner commit SHA, redacted configuration, command, exit code, and cleanup result before claiming independent reproducibility.
 
