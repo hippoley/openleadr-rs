@@ -15,13 +15,14 @@ VALIDATOR = Draft202012Validator(SCHEMA)
 
 def base_artifact():
     return {
-        "schema_version": "0.7.0",
+        "schema_version": "0.8.0",
         "source_commit": "a" * 40,
         "vtn": {"implementation": "independent-example", "version": "1.0", "deployment": "independent"},
         "runner": {"rust_version": "1.91", "os": "linux"},
         "tests": [
             {"name": "program_crud", "command": "cargo test --test program program_crud -- --exact", "exit_code": 0, "log_sha256": "1" * 64},
-            {"name": "event_crud", "command": "cargo test --test event event_crud -- --exact", "exit_code": 0, "log_sha256": "2" * 64}
+            {"name": "event_crud", "command": "cargo test --test event event_crud -- --exact", "exit_code": 0, "log_sha256": "2" * 64},
+            {"name": "ven_role_cannot_create_program", "command": "cargo test --test program ven_role_cannot_create_program -- --exact", "exit_code": 0, "log_sha256": "7" * 64}
         ],
         "cleanup": {"verified": True, "remaining_resources": 0, "log_sha256": "3" * 64},
         "fault_injection": [
@@ -47,6 +48,11 @@ class EvidenceClaimTests(unittest.TestCase):
 
     def test_valid_bounded_claim(self):
         self.assert_valid(base_artifact())
+
+    def test_strong_claim_rejects_missing_ven_authorization_boundary(self):
+        evidence = base_artifact()
+        evidence["tests"] = [test for test in evidence["tests"] if test["name"] != "ven_role_cannot_create_program"]
+        self.assert_invalid(evidence)
 
     def test_strong_claim_rejects_missing_test_log_digest(self):
         evidence = base_artifact()
