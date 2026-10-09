@@ -1,0 +1,8 @@
+[profile.issue53]
+fail-fast = false
+
+[profile.issue53.junit]
+path = "junit.xml"
+store-success-output = false
+store-failure-output = true
+report-skipped = "all"
