@@ -15,25 +15,26 @@ use url::Url;
 
 mod common;
 
+fn validate_external_vtn_url(raw_url: &str) -> Result<Url, String> {
+    let url: Url = raw_url
+        .parse()
+        .map_err(|e| format!("invalid external VTN URL: {e}"))?;
+    if !matches!(url.scheme(), "http" | "https") {
+        return Err("OPENLEADR_RS_VTN_URL must use HTTP or HTTPS".into());
+    }
+    if !url.username().is_empty() || url.password().is_some() {
+        return Err("credentials must not be embedded in OPENLEADR_RS_VTN_URL".into());
+    }
+    if url.query().is_some() || url.fragment().is_some() {
+        return Err("OPENLEADR_RS_VTN_URL must not contain query or fragment".into());
+    }
+    Ok(url)
+}
+
 fn configured_external_vtn() -> Url {
     let raw_url = std::env::var("OPENLEADR_RS_VTN_URL")
         .expect("external test NOT RUN: OPENLEADR_RS_VTN_URL must be set");
-    let url: Url = raw_url
-        .parse()
-        .expect("OPENLEADR_RS_VTN_URL must be a valid URL");
-    assert!(
-        matches!(url.scheme(), "http" | "https"),
-        "OPENLEADR_RS_VTN_URL must use HTTP or HTTPS"
-    );
-    assert!(
-        url.username().is_empty() && url.password().is_none(),
-        "credentials must not be embedded in OPENLEADR_RS_VTN_URL"
-    );
-    assert!(
-        url.query().is_none() && url.fragment().is_none(),
-        "OPENLEADR_RS_VTN_URL must be a base URL, without query or fragment"
-    );
-    url
+    validate_external_vtn_url(&raw_url).expect("invalid external VTN base URL")
 }
 
 #[tokio::test]
@@ -71,13 +72,11 @@ fn rejects_embedded_authentication_and_ambiguous_base_urls() {
         "https://example.test/path?token=private",
         "https://example.test/path#fragment",
     ] {
-        let url: Url = raw.parse().unwrap();
-        assert!(
-            !url.username().is_empty()
-                || url.password().is_some()
-                || url.query().is_some()
-                || url.fragment().is_some(),
-            "test fixture must exercise a rejected base URL"
-        );
+        assert!(validate_external_vtn_url(raw).is_err(), "must reject: {raw}");
     }
+}
+
+#[test]
+fn accepts_clean_base_url() {
+    assert!(validate_external_vtn_url("https://example.test/openadr/").is_ok());
 }
