@@ -52,7 +52,7 @@ async fn event_lifecycle_without_local_database() {
         }
     };
 
-    let event_cleanup = if let Some(id) = event_id {
+    let event_cleanup = if let Some(id) = &event_id {
         match client.get_event_by_id(&id).await {
             Ok(event) => event.delete().await.map(|_| ()).map_err(|e| format!("{e:?}")),
             Err(err) => Err(format!("cannot fetch Event for cleanup: {err:?}")),
