@@ -21,7 +21,7 @@ jobs:
       - name: Install schema test dependency
         run: python3 -m pip install 'jsonschema>=4.20,<5'
       - name: Run assurance unit tests
-        run: python3 -m unittest discover -s openleadr-client/tests -p 'test_assurance_*.py' -v
+        run: python3 -m unittest discover -s openleadr-client/tests -p 'test_assurance*.py' -v
       - name: Validate assurance profiles
         run: python3 openleadr-client/tests/validate_assurance_profiles.py
       - name: Syntax-check external VTN evidence runner
