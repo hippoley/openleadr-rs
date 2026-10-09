@@ -79,6 +79,7 @@ jobs:
           exit 1
       - name: Run actual client HTTP/OAuth read-only Program and Event requests
         run: |
+          set -o pipefail
           cargo test -p openleadr-client --test external_vtn_readonly -- --ignored --nocapture 2>&1 | tee "$RUNNER_TEMP/vtn-client.log"
       - name: Preserve server and client logs even on failure
         if: always()
