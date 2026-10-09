@@ -18,7 +18,10 @@ impl RecoveryJournal {
         let dir = std::env::var_os("OPENLEADR_RS_RECOVERY_DIR")
             .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput,
                 "OPENLEADR_RS_RECOVERY_DIR must point to a private durable directory"))?;
-        let dir = PathBuf::from(dir);
+        Self::begin_in(PathBuf::from(dir), kind, name, url)
+    }
+
+    fn begin_in(dir: PathBuf, kind: &str, name: &str, url: &str) -> io::Result<Self> {
         if !dir.is_dir() {
             return Err(io::Error::new(io::ErrorKind::NotFound,
                 "recovery directory must exist before running mutating tests"));
@@ -47,9 +50,57 @@ impl RecoveryJournal {
 #[cfg(test)]
 mod tests {
     use super::RecoveryJournal;
+    use std::{fs, path::PathBuf};
+    use uuid::Uuid;
+
+    struct TestDir(PathBuf);
+
+    impl TestDir {
+        fn new() -> Self {
+            let path = std::env::temp_dir()
+                .join(format!("openleadr-journal-test-{}", Uuid::new_v4()));
+            fs::create_dir(&path).expect("create test journal directory");
+            Self(path)
+        }
+    }
+
+    impl Drop for TestDir {
+        fn drop(&mut self) {
+            fs::remove_dir_all(&self.0).expect("remove test journal directory");
+        }
+    }
+
     #[test]
-    fn reject_missing_directory_and_unsafe_filename() {
-        let bad = RecoveryJournal::begin("Program", "../unsafe", "https://example.test/");
-        assert!(bad.is_err());
+    fn reject_unsafe_names_in_real_directory() {
+        let dir = TestDir::new();
+        assert!(RecoveryJournal::begin_in(dir.0.clone(), "Program", "../unsafe", "https://example.test/").is_err());
+        assert!(RecoveryJournal::begin_in(dir.0.clone(), "../Event", "safe", "https://example.test/").is_err());
+        assert_eq!(fs::read_dir(&dir.0).unwrap().count(), 0);
+    }
+
+    #[test]
+    fn persist_intent_and_refuse_duplicate_run() {
+        let dir = TestDir::new();
+        let mut journal = RecoveryJournal::begin_in(
+            dir.0.clone(), "Program", "probe-123", "https://example.test/"
+        ).expect("begin journal");
+        journal.record("PROGRAM_CREATE_ATTEMPT").expect("sync intent");
+        let path = journal.path.clone();
+        drop(journal);
+
+        let recorded = fs::read_to_string(&path).expect("read persisted journal");
+        assert!(recorded.contains("BEGIN name=probe-123 url=https://example.test/"));
+        assert!(recorded.contains("PROGRAM_CREATE_ATTEMPT"));
+        assert!(RecoveryJournal::begin_in(
+            dir.0.clone(), "Program", "probe-123", "https://example.test/"
+        ).is_err(), "existing log must never be truncated");
+        assert_eq!(fs::read_to_string(&path).unwrap(), recorded);
+    }
+
+    #[test]
+    fn missing_directory_fails_closed() {
+        let dir = TestDir::new();
+        let absent = dir.0.join("missing");
+        assert!(RecoveryJournal::begin_in(absent, "Program", "probe", "https://example.test/").is_err());
     }
 }
