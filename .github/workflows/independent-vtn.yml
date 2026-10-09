@@ -1,0 +1,77 @@
+name: Independent VTN interoperability (experimental)
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/independent-vtn.yml'
+      - 'openleadr-client/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+
+permissions:
+  contents: read
+
+jobs:
+  upstream-vtn:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      OPENLEADR_RS_VTN_URL: http://127.0.0.1:3000/openadr3/3.1.0
+      OPENLEADR_RS_BL_CLIENT_ID: bl-1
+      OPENLEADR_RS_VEN_CLIENT_ID: ven-1
+      OPENLEADR_RS_REQUIRE_EXTERNAL_VTN: '1'
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Install independent VTN from upstream crate
+        run: |
+          cargo install openadr --locked --features vtn,client,internal-auth,sqlite
+          openadr --version | tee upstream-version.txt
+          openadr vtn --help > upstream-cli.txt
+      - name: Start disposable upstream VTN
+        run: |
+          set -euo pipefail
+          BL_SECRET="$(openssl rand -hex 24)"
+          VEN_SECRET="$(openssl rand -hex 24)"
+          echo "::add-mask::$BL_SECRET"
+          echo "::add-mask::$VEN_SECRET"
+          echo "OPENLEADR_RS_BL_CLIENT_SECRET=$BL_SECRET" >> "$GITHUB_ENV"
+          echo "OPENLEADR_RS_VEN_CLIENT_SECRET=$VEN_SECRET" >> "$GITHUB_ENV"
+          openadr vtn --listen 127.0.0.1:3000 --database ./independent-vtn.sqlite \
+            --client-hashed "bl-1:$(openadr hash-secret "$BL_SECRET"):bl" \
+            --client-hashed "ven-1:$(openadr hash-secret "$VEN_SECRET"):ven" \
+            > upstream-vtn.log 2>&1 &
+          echo $! > upstream-vtn.pid
+          for attempt in $(seq 1 45); do
+            if curl --fail --silent "$OPENLEADR_RS_VTN_URL/auth/server" > /dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat upstream-vtn.log >&2
+          exit 1
+      - name: Run real cross-implementation evidence probes
+        run: |
+          bash openleadr-client/tests/run_external_vtn_evidence.sh external-vtn-evidence
+          bash openleadr-client/tests/run_external_vtn_parallel_isolation.sh external-vtn-parallel
+      - name: Record public provenance and retain logs
+        if: always()
+        run: |
+          mkdir -p upstream-receipt
+          git rev-parse HEAD > upstream-receipt/runner-commit.txt
+          rustc --version > upstream-receipt/rust-version.txt
+          cp upstream-version.txt upstream-receipt/ 2>/dev/null || true
+          cp upstream-cli.txt upstream-receipt/ 2>/dev/null || true
+          cp upstream-vtn.log upstream-receipt/ 2>/dev/null || true
+          if [ -f upstream-vtn.pid ]; then kill "$(cat upstream-vtn.pid)" || true; fi
+          find external-vtn-evidence external-vtn-parallel -type f -print0 2>/dev/null | xargs -0 -r sha256sum > upstream-receipt/log-sha256.txt
+          echo 'UNVERIFIED: no independent remote cleanup observer; not certification or strong claim.' > upstream-receipt/CLAIM-CEILING.txt
+      - name: Upload public review artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: upstream-vtn-experimental-receipt
+          path: |
+            upstream-receipt/
+            external-vtn-evidence/
+            external-vtn-parallel/
+          if-no-files-found: warn
