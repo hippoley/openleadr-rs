@@ -38,7 +38,7 @@ def validate(data):
                 errors.append(f"{sid}: cannot close with unverified applicable dimension")
             if story.get("vertical_acceptance") != "VERIFIED" or story.get("horizontal_acceptance") != "VERIFIED":
                 errors.append(f"{sid}: both acceptance layers must be VERIFIED")
-            if not story.get("evidence") or not story.get("independent_acceptance"):
+            if not story.get("evidence") or story.get("independent_acceptance") in (None, "", "self-asserted"):
                 errors.append(f"{sid}: closure requires evidence and independent acceptance")
         for dep in story.get("depends_on", []):
             if dep not in lookup or dep == sid:
