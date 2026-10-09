@@ -101,3 +101,7 @@ The independent candidate recipe now uses `--client-hashed` with Argon2id rather
 ## Standards-vs-vendor adapter correction — 2026-10-09
 
 External comparison found `GET /auth/server` is required by OpenADR 3.1, while `GET /openapi.json` is a capability of the candidate `hupe1980/openadr` VTN rather than a universally required protocol endpoint. Earlier preflight erroneously made both mandatory, risking false rejection of compliant third-party VTNs. `1b9707c` makes the OpenAPI capability check opt-in via `OPENLEADR_RS_REQUIRE_OPENAPI=1`; `37fa84d` adds a negative regression proving standards-mode discovery never calls the vendor endpoint. The candidate recipe may opt in to strict OpenAPI checking; generic runners must not require it. Actual external execution remains blocked.
+
+## CI regression closure attempt — 2026-10-09
+
+Workflow `Checks` for `0ffcc41` failed while Rust docs and stable/MSRV/aarch64/musl build+test jobs passed. Actionable failures were: three external-preflight unit errors caused by an incorrectly edited optional OpenAPI branch; rustfmt differences in `common/mod.rs` and `program.rs`; clippy x86_64-musl also failed and must be re-evaluated on the repaired head. `dc0d0e2` rewrote the preflight branch and exposes the discovered token endpoint, `8b2b050` and `1ba51f4` apply the exact rustfmt layouts from CI. These changes are **not verified** until the new head completes CI.
