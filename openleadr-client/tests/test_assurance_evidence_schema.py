@@ -25,7 +25,7 @@ def base_artifact():
         "effect_verification": [{
             "operation": "create", "resource_type": "Program", "resource_id": "run-scoped-id",
             "observation": "read-after-write", "verified": True, "verdict": "matched",
-            "attribution": "bounded", "pre_action_observation": True
+            "attribution": "bounded", "pre_action_observation": True, "operation_correlation": "run-123:create:program"
         }]
     }
 
@@ -64,6 +64,16 @@ class EvidenceClaimTests(unittest.TestCase):
     def test_strong_claim_rejects_unattributed_effect(self):
         evidence = base_artifact()
         evidence["effect_verification"][0]["attribution"] = "unattributed"
+        self.assert_invalid(evidence)
+
+    def test_strong_claim_rejects_missing_operation_correlation(self):
+        evidence = base_artifact()
+        del evidence["effect_verification"][0]["operation_correlation"]
+        self.assert_invalid(evidence)
+
+    def test_strong_claim_rejects_empty_operation_correlation(self):
+        evidence = base_artifact()
+        evidence["effect_verification"][0]["operation_correlation"] = ""
         self.assert_invalid(evidence)
 
     def test_execution_only_may_record_failed_test(self):
