@@ -21,6 +21,35 @@ fn default_content() -> ProgramRequest {
 
 #[tokio::test]
 #[serial]
+async fn ven_role_cannot_create_program() {
+    let ctx = common::setup::<BusinessLogic>(common::AuthRole::Ven).await;
+    let content = ProgramRequest {
+        program_name: format!("ven-must-not-create-program-{}", uuid::Uuid::new_v4()),
+        ..default_content()
+    };
+
+    match ctx.create_program(content).await {
+        Ok(program) => {
+            let id = program.id().clone();
+            let cleanup = program.delete().await;
+            panic!(
+                "VEN credentials unexpectedly created Program {id}; cleanup result: {cleanup:?}"
+            );
+        }
+        Err(err) => assert!(
+            matches!(
+                err,
+                Error::Problem(ref problem)
+                    if problem.status == StatusCode::UNAUTHORIZED
+                        || problem.status == StatusCode::FORBIDDEN
+            ),
+            "VEN Program creation must fail with 401/403, got: {err}"
+        ),
+    }
+}
+
+#[tokio::test]
+#[serial]
 async fn program_crud() {
     let ctx = common::setup::<BusinessLogic>(common::AuthRole::Bl).await;
     let run_id = uuid::Uuid::new_v4();
