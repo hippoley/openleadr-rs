@@ -117,3 +117,12 @@ NA for credentials state means no persistent state is required of the configurat
 **Next concrete execution**: run Cargo check with the latest branch, then inject a fault where the server persists an Event but drops its POST response; verify test reports uncertainty and retains the Program for recovery. Separately verify normal delete path and no regressions.
 
 **HCA impact**: US53-02 Event state/abnormal control flow improved in code only; US53-05 error recovery still PARTIAL; US53-04 cross-machine serialization still BLOCKED. DEF-08 = P0 ambiguous remote Event CREATE response, source mitigation committed, independent verification outstanding.
+
+## HCA iteration — symmetric Program CREATE uncertainty (2026-10-09)
+
+- Independent cross-story review found the Program test assumed an error response implied CREATE did not happen; the Event test had already addressed the same ambiguity.
+- **DEF-09 P0, source mitigation committed**: Program CREATE errors now report the run-unique name and explicitly require VTN reconciliation rather than pretending no remote resource was created. Commit `70d7d71408088f7b4c935ed80ac5c041df13da06`.
+- This is *not* crash-safe journaling, automatic cleanup, or a passed integration test. An error may happen after remote commit; humans must still locate and remove the named resource. Vertical status: PARTIAL. Horizontal state/recovery: PARTIAL, E2E: BLOCKED.
+- **Independent falsification**: inject a VTN that accepts Program POST then drops its response; verify the diagnostic includes the unique name; find and delete the resource by name. Repeat Event and Program workflows after real Cargo compilation.
+- **Runtime/toolchain check**: no `cargo` or `rustc` resolved in the available execution container on 2026-10-09; actual compile and run results cannot be asserted.
+- Next P0 sequence: install or use a runner with Rust, compile all external test binaries, fix any API/compiler errors, then implement a durable pre-CREATE journal plus crash recovery and validate against dedicated VTN. Keep upstream #525 unchanged.
