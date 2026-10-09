@@ -41,10 +41,10 @@ fn credential_policy(strict: bool, id: Option<&str>, secret: Option<&str>) -> Re
     if !strict {
         return Ok(());
     }
-    if id.is_none_or(|value| value.trim().is_empty()) {
+    if id.map_or(true, |value| value.trim().is_empty()) {
         return Err("client ID");
     }
-    if secret.is_none_or(|value| value.trim().is_empty()) {
+    if secret.map_or(true, |value| value.trim().is_empty()) {
         return Err("client secret");
     }
     Ok(())
