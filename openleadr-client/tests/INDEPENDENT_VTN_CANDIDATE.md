@@ -24,10 +24,13 @@ cargo install openadr --features vtn,client,internal-auth,sqlite
 export BL_SECRET="$(openssl rand -hex 24)"
 export VEN_SECRET="$(openssl rand -hex 24)"
 openadr vtn --listen 127.0.0.1:3000 --database ./external-vtn.sqlite \
-  --client "bl-1:$BL_SECRET:bl" --client "ven-1:$VEN_SECRET:ven"
+  --client-hashed "bl-1:$(openadr hash-secret "$BL_SECRET"):bl" \
+  --client-hashed "ven-1:$(openadr hash-secret "$VEN_SECRET"):ven"
 ```
 
-In a second shell, **using the same secrets**:
+The hashed form prevents exposing plaintext client secrets in the VTN process command line. Use a local, disposable SQLite file and never publish the database or credentials.
+
+In a second shell, **using the same secrets** (export them through a protected secret store or local shell session; shell exports do not automatically cross terminals):
 
 ```sh
 export OPENLEADR_RS_VTN_URL=http://127.0.0.1:3000/openadr3/3.1.0
@@ -35,6 +38,7 @@ export OPENLEADR_RS_BL_CLIENT_ID=bl-1
 export OPENLEADR_RS_BL_CLIENT_SECRET="$BL_SECRET"
 export OPENLEADR_RS_VEN_CLIENT_ID=ven-1
 export OPENLEADR_RS_VEN_CLIENT_SECRET="$VEN_SECRET"
+python3 openleadr-client/tests/preflight_external_vtn.py
 bash openleadr-client/tests/run_external_vtn_evidence.sh
 bash openleadr-client/tests/run_external_vtn_parallel_isolation.sh
 ```
