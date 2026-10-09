@@ -47,7 +47,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
       - name: Build real VTN and external VEN probes
         run: |
-          cargo build -p openleadr-vtn --bin openleadr-vtn
+          cargo build -p openleadr-vtn --bin openleadr-vtn --features internal-oauth
           cargo test -p openleadr-client --test external_vtn_readonly --no-run
       - name: Migrate and seed dedicated database
         run: |
