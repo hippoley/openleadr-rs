@@ -15,12 +15,13 @@ VALIDATOR = Draft202012Validator(SCHEMA)
 
 def base_artifact():
     return {
-        "schema_version": "0.4.0",
+        "schema_version": "0.5.0",
         "source_commit": "a" * 40,
         "vtn": {"implementation": "independent-example", "version": "1.0", "deployment": "independent"},
         "runner": {"rust_version": "1.91", "os": "linux"},
         "tests": [{"name": "program_crud", "command": "cargo test --test program program_crud -- --exact", "exit_code": 0}],
         "cleanup": {"verified": True, "remaining_resources": 0},
+        "fault_injection": [{"name": "program_post_create_panic", "command": "OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE=1 cargo test --test program program_crud -- --exact", "expected_nonzero_exit": True, "observed_exit_code": 101, "cleanup_verified": True, "remaining_resources": 0}],
         "claim": "independent-vtn-crud",
         "effect_verification": [{
             "operation": "create", "resource_type": "Program", "resource_id": "run-scoped-id",
@@ -74,6 +75,26 @@ class EvidenceClaimTests(unittest.TestCase):
     def test_strong_claim_rejects_empty_operation_correlation(self):
         evidence = base_artifact()
         evidence["effect_verification"][0]["operation_correlation"] = ""
+        self.assert_invalid(evidence)
+
+    def test_strong_claim_rejects_missing_fault_injection(self):
+        evidence = base_artifact()
+        del evidence["fault_injection"]
+        self.assert_invalid(evidence)
+
+    def test_strong_claim_rejects_fault_injection_cleanup_failure(self):
+        evidence = base_artifact()
+        evidence["fault_injection"][0]["cleanup_verified"] = False
+        self.assert_invalid(evidence)
+
+    def test_strong_claim_rejects_fault_injection_residue(self):
+        evidence = base_artifact()
+        evidence["fault_injection"][0]["remaining_resources"] = 1
+        self.assert_invalid(evidence)
+
+    def test_fault_injection_must_observe_nonzero_exit(self):
+        evidence = base_artifact()
+        evidence["fault_injection"][0]["observed_exit_code"] = 0
         self.assert_invalid(evidence)
 
     def test_execution_only_may_record_failed_test(self):
