@@ -232,3 +232,11 @@ Direct job-log observations:
 - Fix `097986c810e1e9303466f6c6d2ce657c7953dbd1`: explicit OAuth env and a second VTN process-liveness assertion before HTTP tests in the real-upstream workflow.
 - Both workflows were retriggered by GitHub push. Verification status at time of this entry: **queued/in progress, no passing new E2E receipt yet**.
 - Next gate: inspect final run logs, save server startup diagnosis and redacted Program/Event network responses, then show tested commit, runtime VTN version, cleanup state and independent read-back. Passing local in-tree E2E is not independent third-party VTN proof; Issue #53 Verified Closed still 0.
+
+## Benchmark executable binding audit — 2026-10-09
+
+- Canonical `cases.json` now has `execution_bindings.json` with an explicit Rust test-function mapping or `absent` marker for all 16 cases. This is **source-level traceability, not execution evidence**.
+- `validate_bindings.py` rejects duplicate or unaccounted case IDs, nonexistent source paths/functions, functions without Rust test attributes and false non-absent references; wired into `.github/workflows/external-vtn-validation.yml`.
+- Binding classification: **2 exact entry points** (B004 Program CRUD, B006 Event CRUD), **3 partial** (B001–B003 authorization guard), **11 absent**. Exact entry point does not prove real VTN execution. Coverage and live pass counts are distinct measures.
+- Commits `1457b841b73bf70137a736503a5c618668659357`, `5317146fab960695790b40bbe6d43a1ce6f0f25c`, `6fbc310b947bd8693f2e9de43da3c69998abedc4`. Remote GitHub CI was queued/running when checked; no pass is inferred.
+- HCA: code linkage P, independent oracle N, actual remote integration B, cleanup/recovery B, external compatibility B, performance measurement N; no Verified Closed. Next: check failing real-process CI logs and produce real authorized independent VTN receipts, then bind positive and fault scenarios to runnable drivers with independent observation.
