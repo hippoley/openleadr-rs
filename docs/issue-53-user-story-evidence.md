@@ -221,3 +221,14 @@ Direct job-log observations:
 - **Vertical claim if green:** real upstream Rust VTN ↔ Rust VEN client authentication and list endpoints, with ephemeral local storage. Not evidence for third-party interoperability, mutation CRUD, cross-host isolation or crash recovery.
 - **Residual critical gates:** inspect this run's first outcome, repair any real errors and rerun, then obtain **authorized independent third-party VTN** results. A public URL and run artifacts cannot substitute for evidence that a distinct vendor implementation was exercised.
 - **US53-01/02/03 integration status:** E2E_RUN_QUEUED, no Verified Closed; **US53-05/06** remain incomplete.
+
+## 2026-10-09 real-process CI failure triage and corrective commits
+
+**Public, actually executed failed receipts** (not to be reclassified as successes):
+- [Live upstream VTN run 37905077347](https://github.com/hippoley/openleadr-rs/actions/runs/37905077347), real-vtn-readonly job 113736481826, FAILURE at Program/Event network test: OAuth token request to `127.0.0.1:3000/auth/token` returned `Connection refused`; both external list probes FAILED.
+- [External VTN validation run 37905077304](https://github.com/hippoley/openleadr-rs/actions/runs/37905077304), job 113736481571, FAILURE during DB setup: `psql` tried default local UNIX socket and failed because `DATABASE_URL` was not exported to the workflow. Its other compile-and-validate job was SUCCESS.
+- Root-cause evidence for the first is **connection refused at runtime**, not proof of why the server process disappeared; further capture `vtn.log`/liveness evidence is mandatory before asserting any startup root cause.
+- Fix `81d03bcb6bb179df4a7fc116081c4211524c685e`: explicit database URL, PostgreSQL CLI, OAuth target/audience in compose-backed integration workflow.
+- Fix `097986c810e1e9303466f6c6d2ce657c7953dbd1`: explicit OAuth env and a second VTN process-liveness assertion before HTTP tests in the real-upstream workflow.
+- Both workflows were retriggered by GitHub push. Verification status at time of this entry: **queued/in progress, no passing new E2E receipt yet**.
+- Next gate: inspect final run logs, save server startup diagnosis and redacted Program/Event network responses, then show tested commit, runtime VTN version, cleanup state and independent read-back. Passing local in-tree E2E is not independent third-party VTN proof; Issue #53 Verified Closed still 0.
