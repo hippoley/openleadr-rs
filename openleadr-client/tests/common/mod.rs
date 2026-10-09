@@ -37,7 +37,11 @@ fn credential_env(name: &str) -> Option<String> {
     }
 }
 
-fn credential_policy(strict: bool, id: Option<&str>, secret: Option<&str>) -> Result<(), &'static str> {
+fn credential_policy(
+    strict: bool,
+    id: Option<&str>,
+    secret: Option<&str>,
+) -> Result<(), &'static str> {
     if !strict {
         return Ok(());
     }
@@ -66,8 +70,11 @@ fn external_vtn_credentials(auth_role: AuthRole) -> ClientCredentials {
     let client_secret = credential_env(secret_var).or(legacy_secret);
 
     if strict_external {
-        credential_policy(true, client_id.as_deref(), client_secret.as_deref())
-            .unwrap_or_else(|missing| panic!("External-only test mode requires non-empty {missing} (or legacy role credentials)"));
+        credential_policy(true, client_id.as_deref(), client_secret.as_deref()).unwrap_or_else(
+            |missing| {
+                panic!("External-only test mode requires non-empty {missing} (or legacy role credentials)")
+            },
+        );
         return ClientCredentials::new(client_id.unwrap(), client_secret.unwrap());
     }
 
@@ -152,7 +159,11 @@ fn fault_injection_enabled(value: Option<&str>) -> bool {
 }
 
 pub fn should_inject_failure_after_create() -> bool {
-    fault_injection_enabled(std::env::var("OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE").ok().as_deref())
+    fault_injection_enabled(
+        std::env::var("OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE")
+            .ok()
+            .as_deref(),
+    )
 }
 
 pub struct TestContext<K> {
