@@ -58,3 +58,46 @@ No user story in this document is marked VERIFIED until its corresponding accept
 - **DEF-07 (P0, FIX COMMITTED / TEST BLOCKED):** prior guard test was a false-positive assertion comparing literals, not testing the guard. Its code was replaced but test outcome remains unknown pending Cargo execution.
 - **Scope integrity:** existing upstream #525 head remains `9139c1718ee1043493f343f02c84f0fd00d9b7cf`; experimental branch remains separate. Issue #53's migration, cross-process isolation and recovery criteria remain incomplete.
 - **Resume directly:** run `cargo test -p openleadr-client --test external_mutation_guard` and `cargo test -p openleadr-client --tests --no-run`; record exit codes and error traces here. If passing, execute independent VTN test matrix only on explicitly authorized, isolated VTN.
+
+## Horizontal Completeness Audit (HCA) — 2026-10-09
+
+**Applicability and provenance.** The only upstream requirement baseline here is [#53](https://github.com/OpenLEADR/openleadr-rs/issues/53) plus the scoped first step [#525](https://github.com/OpenLEADR/openleadr-rs/pull/525). The HCA dimensions below are **audit axes**, not new upstream user stories. Status keys: V = verified by executed test; P = partially covered/code present but not E2E verified; N = unimplemented; B = blocked; NA = not applicable with reason. No V is assigned from source review alone.
+
+| Story | Function | State | Integration | Security | Scale | Maintainability | Observability | Testing | User value | External compatibility |
+|---|---|---|---|---|---|---|---|---|---|---|
+| US53-01 Program | P | P | B | P | B | P | N | B | B | B |
+| US53-02 Event | P | P | B | P | B | P | N | B | B | B |
+| US53-03 URL/credentials | P | NA | B | P | NA | P | N | B | B | P |
+| US53-04 serialization | P | P | B | P | P | P | N | B | B | P |
+| US53-05 cleanup | P | N | B | P | B | P | P | B | B | B |
+| US53-06 implementation-neutral fixtures | P | P | B | P | B | P | N | B | B | B |
+| US53-07 VEN/Resource regressions | P | P | B | P | NA | P | N | B | B | P |
+| PR525-01 configuration seam | P | NA | B | P | NA | P | N | B | B | P |
+
+NA for credentials state means no persistent state is required of the configuration seam itself. NA for scale of configuration and regression preservation means no independent throughput target was specified; this does **not** waive load-related integration concerns. A runtime/real VTN trace is required to upgrade the remaining dimensions to V.
+
+### Cross-story dependency and regression edges
+
+`US53-03 credentials + URL -> US53-01 Program, US53-02 Event -> US53-05 cleanup -> US53-06 portable fixtures -> US53-07 existing regression -> third-party evidence`.
+`US53-04 serialization` applies to all mutating test families and shared VTN environments.
+`PR525-01` is kept isolated from this fork's stricter credential policy: compatibility is an explicit upstream contract, not a silently removed default.
+
+### Mature external tooling comparison
+
+- Existing dependency `serial_test = 3.4.0` supports cross-process file locks via its `file_locks` feature and `#[file_serial(key)]`. Applied to the two destructive probe binaries with the same key. Avoids inventing a custom lock service. Source: https://docs.rs/serial_test/3.5.0/serial_test/attr.file_serial.html
+- `cargo-nextest` also offers `test-groups` with `max-threads = 1`; this is an alternative within a single nextest invocation, not a distributed lock. Source: https://www.nexte.st/docs/configuration/test-groups/
+- The OpenADR Alliance has its own authorized conformance/certification process; these integration probes are **not** official certification. Source: https://www.openadr.org/openadr-3-certification
+
+### Latest actual change, evidence and limitations
+
+- P0/HCA serialization enhancement (source committed): workspace `Cargo.toml` enables `serial_test/file_locks`; both `external_vtn_program_crud.rs` and `external_vtn_event_crud.rs` use `#[file_serial(openleadr_external_vtn)]` rather than `#[serial]`.
+- This addresses cooperating test binaries **on one shared filesystem**, not separate machines, unrelated processes, or crashed remote resources. It does not imply exclusive control of the external VTN.
+- **Test status: NOT EXECUTED.** A check in the available execution container found no `cargo` / `rustc` in PATH. Full Cargo compilation, behavior tests and external VTN E2E remain B.
+- **Independent falsification gates:** (a) launch Program and Event binaries concurrently sharing a temp directory and show mutual exclusion; (b) run both against a disposable VTN and verify not-found after delete; (c) interrupt after creation and recover using durable record; (d) run existing VEN/Resource tests to expose regression; (e) test against an independent implementation.
+- **DEF-03 status:** PARTIAL CODE FIX; NOT VERIFIED CLOSED. Other-machine coordination still OPEN; dedicate the VTN or add a remotely coordinated lease if required.
+- **Do not mark any User Story as Verified Closed on the strength of this change alone.**
+
+### Resume precisely
+1. Ensure Rust toolchain is available; run `cargo test -p openleadr-client --test external_mutation_guard`, `cargo test -p openleadr-client --tests --no-run` and record raw exits and logs.
+2. Confirm the `file_serial` lock behavior with two **separate** `cargo test --test ... -- --ignored` invocations on the same host against a dedicated VTN. Do not assume different hosts share locks.
+3. Only then run fault injection and cross-VTN interoperability against authorized isolated infrastructure; report failed cleanup as residual risk.
