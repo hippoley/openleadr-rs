@@ -14,6 +14,15 @@ REQUIRED = {
 def audit(xml_path: pathlib.Path) -> dict:
     tree = ET.parse(xml_path)
     cases = tree.getroot().findall(".//testcase")
+    if not cases:
+        raise ValueError("JUnit report has zero executed tests")
+    unexpected = []
+    for case in cases:
+        name = case.get("name", "").split("::")[-1]
+        if name not in REQUIRED:
+            unexpected.append(name)
+    if unexpected:
+        raise ValueError(f"unexpected tests in dedicated E2E receipt: {sorted(unexpected)}")
     seen = {}
     for case in cases:
         name = case.get("name", "").split("::")[-1]
