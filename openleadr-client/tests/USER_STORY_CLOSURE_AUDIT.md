@@ -19,7 +19,7 @@ The upstream README describes an OpenADR 3.1 Rust VEN client and VTN server. The
 | US-07 independent reproduction | target implementation/version, exact commit, redacted logs, command, exits, observed effect | JSON Schema and documentation | CONTRACT PRESENT; actual independent artifact NOT VERIFIED |
 | US-08 claim ceiling | failed tests, non-independent deployment, unverified effect, or residual resources cannot produce strong interoperability claim | JSON Schema v0.9 with paired Program/Event success, paired fault-injection cleanup, operation correlation, and retained-log/observation digests | CI-VERIFIED CONTRACT; actual independent artifact still needed |
 | US-09 assurance contract CI | validator tests, profile validation and compiler run on PR | Added `assurance-contracts` job to `.github/workflows/checks.yml` | CI VERIFIED; assurance job and repository checks have passed on this branch |
-| US-10 mixed-scope safety | unresolved Gateway status semantics cannot become reportable normative test | validator + compiler readiness gate | CODE PRESENT; runtime CI pending |
+| US-10 mixed-scope safety | unresolved Gateway status semantics cannot become reportable normative test | validator/compiler gate plus `test_assurance_profile_boundaries.py`; CI discovery broadened to execute the boundary regression | IMPLEMENTED; latest CI required before VERIFIED |
 | US-11 official Gateway adoption | native conformance PR reviewed/merged | #4303 draft only, normative blocker; prior write attempts 403 | HOLD; NOT ADOPTED |
 | US-12 A2A adoption | upstream accepted/merged test or externally consumed artifact | No A2A fork or contribution from this branch | NOT STARTED HERE; do not add unrelated code to OpenADR repo |
 | US-13 published identity | independent reviewer can verify contribution via merge, release or report | local commits only | NOT YET |
@@ -55,4 +55,5 @@ Keep this branch focused on closing OpenADR interoperability and evidence truthf
 | D-001 | P0 | US-08 | v0.9 positive fixture omitted required Program fault `log_sha256` and added a forbidden cleanup property, so contract tests could fail for fixture drift rather than claim semantics | fixed in `e50b0fc`; template/schema parity regression added | latest branch CI pending |
 | D-002 | P0 | US-07/08 | evidence template pre-declared `deployment=independent` before an actual run | changed to `unknown` in `57328af`; regression proves untouched template cannot be promoted to a strong claim | latest branch CI pending |
 | D-003 | P1 | US-06 | UUID ownership alone did not prove multi-process isolation | ownership regression plus two-process external runner added | local contract present; independent execution pending |
+| D-004 | P1 | US-10 | mixed-scope fail-closed behavior existed in validator/compiler but had no dedicated discovered regression test | added profile-boundary tests and widened CI discovery pattern | latest branch CI pending |
 
