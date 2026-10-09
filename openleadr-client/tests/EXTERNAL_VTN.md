@@ -302,3 +302,17 @@ Gateway implementations now provide evidence for both directions of status/effec
 This pair is stronger than treating either bug as a product-specific defect. It motivates a narrow assurance rule for externally effective Gateway behavior: controller status and dataplane observation are distinct evidence surfaces, and a conformance claim that spans both must reject contradictions between them.
 
 This does **not** imply that every Gateway API condition requires an end-to-end probe. The reusable claim is limited to obligations that assert externally effective programming or rejection.
+
+## Evidence v0.6 strong-claim coverage
+
+A strong `independent-vtn-crud` or `interoperability-candidate` claim
+requires **both** successful normal tests (`program_crud`, `event_crud`)
+and **both** independently recorded intentional post-create failures
+(`program_post_create_panic`, `event_post_create_panic`). Each injected
+test must have a nonzero exit and independently verified zero residual
+resources. A single Program run cannot substantiate Event interoperability.
+`external-vtn-evidence.example.json` is a template, **not** a completed
+run report. The JSON Schema checks structural consistency; it cannot verify
+the truth of operator-entered results, logs, credentials, or deployment
+independence. Retain redacted logs and independent remote observations.
+
