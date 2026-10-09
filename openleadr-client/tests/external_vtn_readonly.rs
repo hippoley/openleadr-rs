@@ -22,6 +22,12 @@ fn validate_external_vtn_url(raw_url: &str) -> Result<Url, String> {
     if !matches!(url.scheme(), "http" | "https") {
         return Err("OPENLEADR_RS_VTN_URL must use HTTP or HTTPS".into());
     }
+    // OAuth client secrets must not be sent over cleartext off-host.
+    if url.scheme() == "http"
+        && !matches!(url.host_str(), Some("localhost" | "127.0.0.1" | "[::1]"))
+    {
+        return Err("non-local external VTN URLs must use HTTPS".into());
+    }
     if !url.username().is_empty() || url.password().is_some() {
         return Err("credentials must not be embedded in OPENLEADR_RS_VTN_URL".into());
     }
@@ -71,6 +77,7 @@ fn rejects_embedded_authentication_and_ambiguous_base_urls() {
         "https://user:secret@example.test/",
         "https://example.test/path?token=private",
         "https://example.test/path#fragment",
+        "http://remote.example.test/openadr/",
     ] {
         assert!(validate_external_vtn_url(raw).is_err(), "must reject: {raw}");
     }
@@ -79,4 +86,5 @@ fn rejects_embedded_authentication_and_ambiguous_base_urls() {
 #[test]
 fn accepts_clean_base_url() {
     assert!(validate_external_vtn_url("https://example.test/openadr/").is_ok());
+    assert!(validate_external_vtn_url("http://127.0.0.1:3000/").is_ok());
 }
