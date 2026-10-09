@@ -14,7 +14,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "0.5.0"
+      "const": "0.6.0"
     },
     "source_commit": {
       "type": "string",
@@ -87,7 +87,11 @@
         "properties": {
           "name": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "enum": [
+              "program_crud",
+              "event_crud"
+            ]
           },
           "command": {
             "type": "string",
@@ -246,7 +250,11 @@
         "properties": {
           "name": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "enum": [
+              "program_post_create_panic",
+              "event_post_create_panic"
+            ]
           },
           "command": {
             "type": "string",
@@ -367,20 +375,94 @@
             ]
           },
           "tests": {
-            "minItems": 1,
-            "items": {
-              "properties": {
-                "exit_code": {
-                  "const": 0
-                }
+            "minItems": 2,
+            "allOf": [
+              {
+                "contains": {
+                  "properties": {
+                    "name": {
+                      "const": "program_crud"
+                    },
+                    "exit_code": {
+                      "const": 0
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "exit_code"
+                  ]
+                },
+                "minContains": 1,
+                "maxContains": 1
               },
-              "required": [
-                "exit_code"
-              ]
-            }
+              {
+                "contains": {
+                  "properties": {
+                    "name": {
+                      "const": "event_crud"
+                    },
+                    "exit_code": {
+                      "const": 0
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "exit_code"
+                  ]
+                },
+                "minContains": 1,
+                "maxContains": 1
+              }
+            ]
           },
           "fault_injection": {
-            "minItems": 1,
+            "minItems": 2,
+            "allOf": [
+              {
+                "contains": {
+                  "properties": {
+                    "name": {
+                      "const": "program_post_create_panic"
+                    },
+                    "cleanup_verified": {
+                      "const": true
+                    },
+                    "remaining_resources": {
+                      "const": 0
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "cleanup_verified",
+                    "remaining_resources"
+                  ]
+                },
+                "minContains": 1,
+                "maxContains": 1
+              },
+              {
+                "contains": {
+                  "properties": {
+                    "name": {
+                      "const": "event_post_create_panic"
+                    },
+                    "cleanup_verified": {
+                      "const": true
+                    },
+                    "remaining_resources": {
+                      "const": 0
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "cleanup_verified",
+                    "remaining_resources"
+                  ]
+                },
+                "minContains": 1,
+                "maxContains": 1
+              }
+            ],
             "items": {
               "properties": {
                 "cleanup_verified": {
