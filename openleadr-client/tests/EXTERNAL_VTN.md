@@ -40,6 +40,56 @@ cargo test -p openleadr-client --test event event_crud -- --exact --nocapture
 
 The tests use public client HTTP APIs for their CRUD assertions. They are marked `serial` to reduce collisions with other serial tests in the same test binary. This does **not** coordinate across separately invoked binaries or independent runners.
 
+
+## Reproducible fault-injection probe (opt-in)
+
+The focused Program/Event tests support `OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE=1`.
+This deliberately panics immediately after the first resource has been created and
+its ID retained (Program for `program_crud`; Event, after its parent Program, for
+`event_crud`). The protected test body unwinds and the cleanup path must still
+delete the created resources. **The test process is expected to exit nonzero**;
+that is not an interoperability failure by itself. Verify remote absence of all
+run-scoped resources before recording cleanup success.
+
+Run these commands only against a **disposable** VTN; never against a shared
+production environment:
+
+```sh
+export OPENLEADR_RS_REQUIRE_EXTERNAL_VTN=1
+export OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE=1
+cargo test -p openleadr-client --test program program_crud -- --exact --nocapture
+cargo test -p openleadr-client --test event event_crud -- --exact --nocapture
+unset OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE
+```
+
+For a strong claim, run the two ordinary (non-injected) CRUD tests separately
+with exit code 0, then record fault-injection results as an explicitly separate
+negative experiment. Never include the intentionally failing commands as passing
+`tests` in a strong-claim artifact. A successful unwind cleanup attempt does
+not cover process termination, a lost create response, or a remote delete outage.
+
+## Independent VTN candidate (not yet executed)
+
+A concrete second implementation is `hupe1980/openadr`, documented at
+https://hupe1980.github.io/openadr/docs/getting-started/ .
+It supplies an OpenADR 3.1 VTN with SQLite storage and OAuth2 client credentials.
+The published setup starts with:
+
+```sh
+cargo install openadr --features vtn,internal-auth,sqlite
+export BL_SECRET="$(openssl rand -hex 24)"
+openadr vtn --database ./openadr.sqlite --client "bl-1:$BL_SECRET:bl"
+```
+
+Set `OPENLEADR_RS_VTN_URL` to the **actual base URL printed or advertised by
+that running VTN**, and set the BL credential variables to `bl-1` and the
+generated secret. Confirm the OAuth token endpoint and OpenADR 3.1 base path
+match the client's discovery expectations before running the focused tests.
+This is a **candidate**, not an executed compatibility result. Record exact
+implementation commit/release, configuration, run commit, test output, and
+post-cleanup observation. If the two implementations disagree, preserve the
+redacted counterexample instead of weakening the oracle to manufacture PASS.
+
 ## What a successful run would demonstrate
 
 - The configured VTN accepted the supplied Business Logic identity.
