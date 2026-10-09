@@ -105,3 +105,7 @@ External comparison found `GET /auth/server` is required by OpenADR 3.1, while `
 ## CI regression closure attempt — 2026-10-09
 
 Workflow `Checks` for `0ffcc41` failed while Rust docs and stable/MSRV/aarch64/musl build+test jobs passed. Actionable failures were: three external-preflight unit errors caused by an incorrectly edited optional OpenAPI branch; rustfmt differences in `common/mod.rs` and `program.rs`; clippy x86_64-musl also failed and must be re-evaluated on the repaired head. `dc0d0e2` rewrote the preflight branch and exposes the discovered token endpoint, `8b2b050` and `1ba51f4` apply the exact rustfmt layouts from CI. These changes are **not verified** until the new head completes CI.
+
+## CI stop-line correction — 2026-10-09
+
+Workflow `Checks` for `078c715`: assurance contract job passed, dependency audit passed, Rust docs passed. The remaining failures were not independent-VTN failures: literal `\\n` sequences had been accidentally written into `program.rs` by an automated text patch, causing compilation/format/clippy/udeps fan-out. `bf747da` replaces those artifacts with real source newlines. This incident is classified as an implementation regression and prevents US-06/14 closure until the repaired head passes CI. It also demonstrates why CI output, rather than patch success, is the acceptance authority.
