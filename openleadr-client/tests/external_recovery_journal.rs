@@ -3,7 +3,7 @@
 //! The journal is not a transaction log and does not perform recovery itself.
 
 use std::{
-    fs::{self, File, OpenOptions},
+    fs::{File, OpenOptions},
     io::{self, Write},
     path::PathBuf,
 };
