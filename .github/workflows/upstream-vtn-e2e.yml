@@ -43,6 +43,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067
         with:
           toolchain: stable
+      - name: Install existing mature cargo-nextest runner
+        uses: taiki-e/install-action@83ac0ad63c0167e6f06796fab0fce28db1bf3db0 # v2.87.22
+        with:
+          tool: cargo-nextest
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
       - name: Build real VTN and external VEN probes
@@ -76,9 +80,10 @@ jobs:
       - name: Execute real network Program and Event list
         run: |
           set -o pipefail
-          cargo test -p openleadr-client --test external_vtn_readonly -- --ignored --nocapture 2>&1 | tee readonly-e2e.log
-          test "$(grep -c 'PROGRAM_LIST PASS' readonly-e2e.log)" -eq 1
-          test "$(grep -c 'EVENT_LIST PASS' readonly-e2e.log)" -eq 1
+          cargo nextest run -p openleadr-client --test external_vtn_readonly --profile issue53 --run-ignored only --no-tests fail --test-threads 1 2>&1 | tee readonly-e2e.log
+          python3 benchmarks/issue53/verify_junit.py target/nextest/issue53/junit.xml --output issue53-e2e-receipt.json
+          git rev-parse HEAD > issue53-tested-sha.txt
+          sha256sum target/nextest/issue53/junit.xml readonly-e2e.log vtn.log issue53-e2e-receipt.json > issue53-sha256.txt
       - name: Preserve reviewable real-service evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -89,4 +94,8 @@ jobs:
             vtn.log
             readonly-e2e.log
             seed.log
+            target/nextest/issue53/junit.xml
+            issue53-e2e-receipt.json
+            issue53-tested-sha.txt
+            issue53-sha256.txt
           retention-days: 30
