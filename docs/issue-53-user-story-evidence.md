@@ -51,3 +51,10 @@ Last audited: 2026-10-09. Scope: the upstream [OpenLEADR/openleadr-rs #53](https
 4. Migrate existing SQL-dependent families, run baseline regressions, and request upstream review of scoped changes. Keep experimental tests out of #525 until reviewed.
 
 No user story in this document is marked VERIFIED until its corresponding acceptance evidence exists.
+
+## Execution log — 2026-10-09, follow-up audit
+- **P0 false-positive test coverage fixed:** `external_mutation_guard.rs` previously contained a vacuous string comparison that never exercised authorization. Replaced with pure `validate_target` invoked by the production guard and three table-driven positive/negative unit tests. Commit: `d6d6f61469fff1c33fc0e2d4c2437fa81c36c9f7`.
+- **Verification status:** GitHub source change verified; unit tests NOT EXECUTED. The available execution container did not provide `cargo` in PATH; no real VTN credentials/endpoint are available. This is not a VERIFIED story.
+- **DEF-07 (P0, FIX COMMITTED / TEST BLOCKED):** prior guard test was a false-positive assertion comparing literals, not testing the guard. Its code was replaced but test outcome remains unknown pending Cargo execution.
+- **Scope integrity:** existing upstream #525 head remains `9139c1718ee1043493f343f02c84f0fd00d9b7cf`; experimental branch remains separate. Issue #53's migration, cross-process isolation and recovery criteria remain incomplete.
+- **Resume directly:** run `cargo test -p openleadr-client --test external_mutation_guard` and `cargo test -p openleadr-client --tests --no-run`; record exit codes and error traces here. If passing, execute independent VTN test matrix only on explicitly authorized, isolated VTN.
