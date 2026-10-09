@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.7.0",
+  "schema_version": "0.8.0",
   "source_commit": "0000000000000000000000000000000000000000",
   "vtn": {
     "implementation": "REPLACE_WITH_VTN_IMPLEMENTATION",
@@ -21,6 +21,12 @@
     {
       "name": "event_crud",
       "command": "cargo test -p openleadr-client --test event event_crud -- --exact --nocapture",
+      "exit_code": -1,
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "ven_role_cannot_create_program",
+      "command": "cargo test -p openleadr-client --test program ven_role_cannot_create_program -- --exact --nocapture",
       "exit_code": -1,
       "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     }
