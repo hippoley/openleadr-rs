@@ -101,3 +101,19 @@ NA for credentials state means no persistent state is required of the configurat
 1. Ensure Rust toolchain is available; run `cargo test -p openleadr-client --test external_mutation_guard`, `cargo test -p openleadr-client --tests --no-run` and record raw exits and logs.
 2. Confirm the `file_serial` lock behavior with two **separate** `cargo test --test ... -- --ignored` invocations on the same host against a dedicated VTN. Do not assume different hosts share locks.
 3. Only then run fault injection and cross-VTN interoperability against authorized isolated infrastructure; report failed cleanup as residual risk.
+
+## HCA follow-up — uncertain Event creation response (2026-10-09)
+
+**Cross-system counterexample**: A remote VTN may commit an Event but the client may lose the HTTP response. The former Event CRUD probe treated any failed CREATE response as if the Event did not exist, and proceeded to delete the parent Program. This confuses network uncertainty with transaction failure and risks hiding orphaned state.
+
+**P0 source fix**: `external_vtn_event_crud.rs` now records `event_creation_uncertain` before consuming the result. On uncertain CREATE, it withholds parent deletion and emits the run-unique Program name/ID and error details for reconciliation. Commit: `f7fb5295a6a92ce6c86c18d7548dca1103cbddf7`.
+
+**Residual gap**: This is a fail-safe response, not automatic reconciliation. A durable pre-CREATE journal and remote lookup by run-specific names, retry-safe cleanup, and crash/failure injection are still required. Status **PARTIAL / TEST BLOCKED**. Neither vertical nor horizontal Verified Closed is justified.
+
+**Mature dependency cross-check**: `serial_test::file_serial` is documented under feature `file_locks`, with a shared key giving file-backed serialization for cooperating tests. See https://docs.rs/serial_test/latest/serial_test/attr.file_serial.html . Not a distributed lease across hosts.
+
+**Runtime evidence**: Local container check 2026-10-09: neither `cargo` nor `rustc` found on PATH; no compilation or external-service E2E test was executed. Do not claim test success.
+
+**Next concrete execution**: run Cargo check with the latest branch, then inject a fault where the server persists an Event but drops its POST response; verify test reports uncertainty and retains the Program for recovery. Separately verify normal delete path and no regressions.
+
+**HCA impact**: US53-02 Event state/abnormal control flow improved in code only; US53-05 error recovery still PARTIAL; US53-04 cross-machine serialization still BLOCKED. DEF-08 = P0 ambiguous remote Event CREATE response, source mitigation committed, independent verification outstanding.
