@@ -52,6 +52,12 @@ class EvidenceClaimTests(unittest.TestCase):
         example = json.loads(example_path.read_text())
         self.assert_valid(example)
 
+    def test_template_cannot_be_promoted_to_strong_claim(self):
+        example_path = Path(__file__).with_name("external-vtn-evidence.example.json")
+        example = json.loads(example_path.read_text())
+        example["claim"] = "independent-vtn-crud"
+        self.assert_invalid(example)
+
     def test_valid_bounded_claim(self):
         self.assert_valid(base_artifact())
 
