@@ -38,7 +38,7 @@ def preflight(base, fetch=get_json):
         raise ValueError("HTTPS VTN advertises insecure token endpoint")
     if target.hostname in ("localhost","127.0.0.1","::1") and token.hostname not in ("localhost","127.0.0.1","::1"):
         raise ValueError("loopback VTN advertises non-loopback token endpoint")
-    spec=fetch(base+"/openapi.json")
+    # OpenAPI publication is an implementation capability, not an OpenADR requirement.\n    # Keep this strict check scoped to the documented candidate adapter.\n    spec=fetch(base+"/openapi.json")
     paths=spec.get("paths") if isinstance(spec,dict) else None
     if not isinstance(paths,dict):
         raise ValueError("openapi.json must contain paths")
