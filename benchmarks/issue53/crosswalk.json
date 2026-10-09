@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Manual crosswalk; shared IDs are related requirements, not equivalent executions. Do not aggregate duplicate observations.",
+  "mapping": [
+    {
+      "json_id": "B001",
+      "jsonl_id": "url_https_clean",
+      "relation": "related"
+    },
+    {
+      "json_id": "B002",
+      "jsonl_id": "missing_credentials_reject",
+      "relation": "related"
+    },
+    {
+      "json_id": "B003",
+      "jsonl_id": "url_http_remote_reject",
+      "relation": "related"
+    },
+    {
+      "json_id": "B004",
+      "jsonl_id": "program_crud_external",
+      "relation": "related"
+    },
+    {
+      "json_id": "B005",
+      "jsonl_id": "program_post_commit_lost_response",
+      "relation": "related"
+    },
+    {
+      "json_id": "B006",
+      "jsonl_id": "event_crud_external",
+      "relation": "related"
+    },
+    {
+      "json_id": "B007",
+      "jsonl_id": "event_post_commit_lost_response",
+      "relation": "related"
+    },
+    {
+      "json_id": "B008",
+      "jsonl_id": "process_crash_after_create",
+      "relation": "partial"
+    },
+    {
+      "json_id": "B009",
+      "jsonl_id": null,
+      "relation": "unmapped"
+    },
+    {
+      "json_id": "B010",
+      "jsonl_id": "event_delete_failure",
+      "relation": "related"
+    },
+    {
+      "json_id": "B011",
+      "jsonl_id": "two_binaries_serial",
+      "relation": "related"
+    },
+    {
+      "json_id": "B012",
+      "jsonl_id": "remote_host_concurrency",
+      "relation": "related"
+    },
+    {
+      "json_id": "B013",
+      "jsonl_id": "alternate_vtn_implementation",
+      "relation": "related"
+    },
+    {
+      "json_id": "B014",
+      "jsonl_id": "legacy_ven_resource_regression",
+      "relation": "related"
+    },
+    {
+      "json_id": "B015",
+      "jsonl_id": "process_crash_after_create",
+      "relation": "related"
+    },
+    {
+      "json_id": "B016",
+      "jsonl_id": null,
+      "relation": "unmapped"
+    }
+  ]
+}
