@@ -33,6 +33,20 @@ class JUnitOracleTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "failure"):
             self.check(GOOD.replace('time="0.01"/>', 'time="0.01"><failure/></testcase>', 1))
 
+    def test_unexpected_failure_is_not_a_pass(self):
+        bad = GOOD.replace("</testsuite>", '<testcase name="other_test"><failure/></testcase></testsuite>')
+        with self.assertRaisesRegex(ValueError, "unexpected"):
+            self.check(bad)
+
+    def test_extra_success_is_not_an_e2e_claim(self):
+        extra = GOOD.replace("</testsuite>", '<testcase name="unrelated_test"/></testsuite>')
+        with self.assertRaisesRegex(ValueError, "unexpected"):
+            self.check(extra)
+
+    def test_zero_tests_is_not_a_pass(self):
+        with self.assertRaisesRegex(ValueError, "zero executed tests"):
+            self.check("<testsuites><testsuite/></testsuites>")
+
     def test_duplicate_is_not_a_pass(self):
         with self.assertRaisesRegex(ValueError, "duplicate"):
             self.check(GOOD.replace("</testsuite>", '<testcase name="external_vtn_can_list_programs_without_local_database" time="0.01"/></testsuite>'))
