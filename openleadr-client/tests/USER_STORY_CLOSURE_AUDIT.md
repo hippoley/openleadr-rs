@@ -97,3 +97,7 @@ The independent candidate recipe now uses `--client-hashed` with Argon2id rather
 | H-007 | P1 | US-01/02/07 | External evidence runner previously executed mutating probes without read-only discovery validation | preflight adapter, adversarial tests, fail-fast runner integration | latest CI and real external VTN execution pending |
 | H-008 | P1 | US-02 | Candidate VTN recipe passed plaintext secrets in process arguments | switched to `--client-hashed` and documented secret transfer boundaries | manual runtime verification pending |
 
+
+## Standards-vs-vendor adapter correction — 2026-10-09
+
+External comparison found `GET /auth/server` is required by OpenADR 3.1, while `GET /openapi.json` is a capability of the candidate `hupe1980/openadr` VTN rather than a universally required protocol endpoint. Earlier preflight erroneously made both mandatory, risking false rejection of compliant third-party VTNs. `1b9707c` makes the OpenAPI capability check opt-in via `OPENLEADR_RS_REQUIRE_OPENAPI=1`; `37fa84d` adds a negative regression proving standards-mode discovery never calls the vendor endpoint. The candidate recipe may opt in to strict OpenAPI checking; generic runners must not require it. Actual external execution remains blocked.
