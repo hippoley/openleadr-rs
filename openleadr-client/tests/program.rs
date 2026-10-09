@@ -35,6 +35,11 @@ async fn program_crud() {
         };
         let created = ctx.create_program(content.clone()).await.unwrap();
         created_id = Some(created.id().clone());
+        // Opt-in fault injection: the outer catch_unwind must still remove
+        // every resource created before this point.
+        if std::env::var("OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE").as_deref() == Ok("1") {
+            panic!("intentional post-create fault injection: verify remote cleanup");
+        }
         assert_eq!(created.content(), &content);
 
         let err = ctx.create_program(content).await.unwrap_err();
