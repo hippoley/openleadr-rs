@@ -15,7 +15,7 @@ VALIDATOR = Draft202012Validator(SCHEMA)
 
 def base_artifact():
     return {
-        "schema_version": "0.9.0",
+        "schema_version": "0.9.1",
         "source_commit": "a" * 40,
         "vtn": {"implementation": "independent-example", "version": "1.0", "deployment": "independent"},
         "runner": {"rust_version": "1.91", "os": "linux"},
@@ -26,6 +26,10 @@ def base_artifact():
             {"name": "concurrent_program_runs_do_not_cross_delete", "command": "cargo test --test program concurrent_program_runs_do_not_cross_delete -- --exact", "exit_code": 0, "log_sha256": "8" * 64}
         ],
         "cleanup": {"verified": True, "remaining_resources": 0},
+        "parallel_isolation": {
+            "runner_a": {"process_label": "runner-a", "command": "bash run_external_vtn_parallel_isolation.sh", "exit_code": 0, "log_sha256": "9" * 64},
+            "runner_b": {"process_label": "runner-b", "command": "bash run_external_vtn_parallel_isolation.sh", "exit_code": 0, "log_sha256": "a" * 64}
+        },
         "fault_injection": [
             {"name": "program_post_create_panic", "command": "OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE=1 cargo test --test program program_crud -- --exact", "expected_nonzero_exit": True, "observed_exit_code": 101, "cleanup_verified": True, "remaining_resources": 0, "log_sha256": "3" * 64},
             {"name": "event_post_create_panic", "command": "OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE=1 cargo test --test event event_crud -- --exact", "expected_nonzero_exit": True, "observed_exit_code": 101, "cleanup_verified": True, "remaining_resources": 0, "log_sha256": "4" * 64}
@@ -60,6 +64,21 @@ class EvidenceClaimTests(unittest.TestCase):
 
     def test_valid_bounded_claim(self):
         self.assert_valid(base_artifact())
+
+    def test_strong_claim_rejects_single_process_isolation_only(self):
+        evidence = base_artifact()
+        del evidence["parallel_isolation"]
+        self.assert_invalid(evidence)
+
+    def test_strong_claim_rejects_failed_parallel_runner(self):
+        evidence = base_artifact()
+        evidence["parallel_isolation"]["runner_b"]["exit_code"] = 1
+        self.assert_invalid(evidence)
+
+    def test_strong_claim_requires_distinct_parallel_labels(self):
+        evidence = base_artifact()
+        evidence["parallel_isolation"]["runner_b"]["process_label"] = "runner-a"
+        self.assert_invalid(evidence)
 
     def test_strong_claim_rejects_missing_cross_run_isolation(self):
         evidence = base_artifact()
