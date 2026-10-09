@@ -150,3 +150,16 @@ NA for credentials state means no persistent state is required of the configurat
 - **Retest run:** https://github.com/hippoley/openleadr-rs/actions/runs/37892618922 was QUEUED upon inspection; status **RETEST_PENDING**, no pass claims.
 - **HCA linkage:** US53-02 external Event list functional correctness, test compilation, client API compatibility, and regression coverage. DEF-10 = P0 incorrect get_event_list signature; fixed in source, independent validation pending.
 - **Remaining limitations:** workflow may still fail on additional errors; normal tests do not exercise a real VTN, and even green CI cannot close US53-02/05 or #53. Reinspect the above CI run, extract exact new failures, fix and rerun. Do not label Verified Closed until required vertical and horizontal acceptance evidence exists.
+
+## HCA independent verification — successful Rust CI (2026-10-09)
+
+**Verified evidence**: [Run #37892618922](https://github.com/hippoley/openleadr-rs/actions/runs/37892618922) (commit `37012bade30ceaed33d9f94e4081c44fb441ec12`) and [Run #37892646476](https://github.com/hippoley/openleadr-rs/actions/runs/37892646476) (commit `84083e0211de5fdb885d46c260ce275850db669d`) both completed with GitHub Actions conclusion **success**. In the latter run, `cargo test -p openleadr-client --tests --no-run`, `cargo test -p openleadr-client --test external_mutation_guard`, and `cargo test -p openleadr-client --test external_vtn_readonly` each concluded **success** according to independent job steps.
+- **DEF-10** (`get_event_list` wrong arity): **VERIFIED FIXED at CI compiler gate**. Narrow technical defect can be closed; this does not mean the entire US53-02 is Verified Closed.
+- **US53-01/02/03** local compiler and pure validation gates now **VERIFIED** at commit `84083e0`, while real third-party behavior stays **BLOCKED**.
+- **US53-04** file-lock code compiles, but independent cross-process overlap/fault-injection execution still required.
+- **US53-05/06/07** E2E, recovery, and legacy regression criteria remain open.
+- No ignored live-VTN mutation test was executed. No external interoperability or OpenADR official certification is claimed.
+
+**Next executable entry**: prioritize disposable, authorized third-party VTN E2E + injected lost-response and failed-cleanup cases. Maintain a separate durable recovery journal and record deletion verification. Coordinate tests across hosts by isolated environments or an external lease; local file locking alone is insufficient.
+
+**Double closure**: no complete original #53 User Story is marked `Verified Closed`. The isolated P0 compiler defect DEF-10 is confirmed fixed by CI.
