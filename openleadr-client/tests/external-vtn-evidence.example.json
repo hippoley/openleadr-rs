@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.6.0",
+  "schema_version": "0.7.0",
   "source_commit": "0000000000000000000000000000000000000000",
   "vtn": {
     "implementation": "REPLACE_WITH_VTN_IMPLEMENTATION",
@@ -16,13 +16,13 @@
       "name": "program_crud",
       "command": "cargo test -p openleadr-client --test program program_crud -- --exact --nocapture",
       "exit_code": -1,
-      "log_sha256": null
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     },
     {
       "name": "event_crud",
       "command": "cargo test -p openleadr-client --test event event_crud -- --exact --nocapture",
       "exit_code": -1,
-      "log_sha256": null
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     }
   ],
   "cleanup": {
@@ -39,8 +39,8 @@
       "observation": "read-after-write",
       "verified": true,
       "verdict": "matched",
-      "before_sha256": null,
-      "after_sha256": null,
+      "before_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "after_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
       "notes": "Counterexample template: an external read-back can match while attribution remains unestablished. This must not be promoted to independent-vtn-crud.",
       "attribution": "unattributed",
       "pre_action_observation": false,
@@ -55,7 +55,7 @@
       "observed_exit_code": -1,
       "cleanup_verified": false,
       "remaining_resources": 0,
-      "log_sha256": null
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     },
     {
       "name": "event_post_create_panic",
@@ -64,7 +64,7 @@
       "observed_exit_code": -1,
       "cleanup_verified": false,
       "remaining_resources": 0,
-      "log_sha256": null
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
     }
   ]
 }
