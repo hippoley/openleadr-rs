@@ -171,3 +171,10 @@ NA for credentials state means no persistent state is required of the configurat
 - **Independent acceptance:** CI run https://github.com/hippoley/openleadr-rs/actions/runs/37893644028 was queued at source inspection. Status `IMPLEMENTED_UNVERIFIED`; no crash/fault injection, journal replay or third-party VTN execution has been demonstrated.
 - **P0 remaining:** replay/reconcile the latest journal state with remote VTN before deletion; ensure idempotency and operator evidence. Note filesystem journal durability depends on reliable underlying storage; fsync does not imply remote operation atomicity.
 - **Scope:** improvement supports US53-05 (failed-test state preservation) but does not redefine Issue #53 or imply certification.
+
+## HCA anti-false-positive journal test (2026-10-09)
+
+- **Previous baseline:** Actions runs [37893637136](https://github.com/hippoley/openleadr-rs/actions/runs/37893637136), [37893644028](https://github.com/hippoley/openleadr-rs/actions/runs/37893644028), [37893675207](https://github.com/hippoley/openleadr-rs/actions/runs/37893675207) all concluded SUCCESS for the pre-CREATE markers (compile plus non-destructive guard/URL tests). No real VTN was contacted.
+- **New independent falsification:** prior `external_recovery_journal.rs` unsafe-name test could pass solely because `OPENLEADR_RS_RECOVERY_DIR` was unset, never reaching the filename validation branch. Updated source extracts `begin_in(dir,kind,name,url)` and tests against actual isolated temp directories. The replacement tests read persisted BEGIN/CREATE_ATTEMPT records, assert duplicate file refusal without truncation, reject traversal-like names, and reject absent directories. Commit `f1c78751c9d03999cc0eb892e8fbc3e9c4d3d74a`.
+- **Status:** CODE COMMITTED, independent CI RUN PENDING at authoring; testing results must be read before claiming a pass. The helper intentionally stays local to the test integration module; no new production library.
+- **HCA:** improves US53-05 test reliability, state persistence, observability, security. Still missing crash/replay recovery and real VTN E2E; no change to overall Verified Closed.
