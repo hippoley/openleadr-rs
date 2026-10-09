@@ -24,6 +24,7 @@ async fn event_lifecycle_without_local_database() {
     let name = format!("openleadr-event-probe-{}", Uuid::new_v4());
     let mut journal = external_recovery_journal::RecoveryJournal::begin("Event", &name, url.as_str())
         .expect("durable recovery journal required before remote parent CREATE");
+    journal.record("PARENT_CREATE_ATTEMPT").expect("persist parent intent before POST");
     let program = client.create_program(ProgramRequest::new(&name)).await
         .expect("create parent Program failed");
     let program_id = program.id().clone();
@@ -31,6 +32,7 @@ async fn event_lifecycle_without_local_database() {
 
     let request = EventRequest::new(program_id.clone()).with_event_name(&name);
     // Do not return early after creating the parent.
+    journal.record("EVENT_CREATE_ATTEMPT").expect("persist Event intent before POST");
     let event_creation = program.create_event(request.clone()).await;
     if let Ok(event) = &event_creation {
         journal.record(&format!("EVENT_CREATED event_id={:?}", event.id())).expect("journal Event ID");
