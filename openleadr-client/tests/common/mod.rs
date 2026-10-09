@@ -26,10 +26,14 @@ fn default_credentials(auth_role: AuthRole) -> ClientCredentials {
 }
 
 fn external_vtn_credentials() -> ClientCredentials {
-    let client_id =
-        std::env::var("OPENLEADR_RS_CLIENT_ID").unwrap_or_else(|_| "admin".to_string());
-    let client_secret =
-        std::env::var("OPENLEADR_RS_CLIENT_SECRET").unwrap_or_else(|_| "admin".to_string());
+    // A third-party VTN must never silently receive the in-tree test defaults.
+    // A missing or empty value is a configuration failure, not authorization.
+    let client_id = std::env::var("OPENLEADR_RS_CLIENT_ID")
+        .expect("external VTN requires OPENLEADR_RS_CLIENT_ID");
+    let client_secret = std::env::var("OPENLEADR_RS_CLIENT_SECRET")
+        .expect("external VTN requires OPENLEADR_RS_CLIENT_SECRET");
+    assert!(!client_id.trim().is_empty(), "OPENLEADR_RS_CLIENT_ID must not be empty");
+    assert!(!client_secret.is_empty(), "OPENLEADR_RS_CLIENT_SECRET must not be empty");
 
     ClientCredentials::new(client_id, client_secret)
 }
