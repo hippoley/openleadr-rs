@@ -23,3 +23,11 @@ The four `gate` values represent task families, *not* train/validation/test stat
 4. P2: measure latency distribution, resource cleanup time and failure rates with enough repeated runs for confidence intervals; publish run configuration and raw artifacts.
 
 **Known missing pieces:** no automated per-case driver, no successful real-VTN runs, no cross-implementation equivalence oracle, and no evidence provenance signature. All story gates remain NOT Verified Closed.
+
+## Cross-manifest integrity audit (2026-10-09)
+
+The repository currently retains **two non-equivalent 16-case datasets**: `cases.json` (B001–B016, with executor/status metadata) and `cases.jsonl` (named scenario definitions and evidence scoring). Treating their totals as 32 independent passed tests or aligning rows by position would be a false result. `crosswalk.json` records explicitly non-equivalent tracing relations; `audit_crosswalk.py` now checks every canonical ID, unknown references, collisions, and orphan scenarios. CI invokes it.
+
+Remote source-level crosswalk evaluation found **3 canonical unmapped cases** (B008 journal durability, B009 duplicate journal rejection, B016 denied-role test) and **3 secondary unmapped cases** (embedded-secret URL rejection, Program list, Event list). The post-correction mapping has no many-to-one references. These are **coverage reconciliation gaps**, not failed live VTN test outcomes.
+
+Run `python3 benchmarks/issue53/audit_crosswalk.py` to see these gaps. The script deliberately exposes `joint_pass_count: null` and `joint_verified_closed: false`: a relationship between cases does not authorize aggregating or deduplicating real execution evidence. Next priority: establish one canonical, executable, versioned case schema and per-case runner mappings with a migration test before removing either legacy manifest. No Rust or external VTN pass is claimed here.
