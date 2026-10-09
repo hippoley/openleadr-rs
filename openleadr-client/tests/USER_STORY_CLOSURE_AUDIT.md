@@ -14,24 +14,24 @@ The upstream README describes an OpenADR 3.1 Rust VEN client and VTN server. The
 | US-02 role credentials | BL credentials used for write operations; VEN role not silently promoted | Environment contract and `common::setup::<BusinessLogic>(AuthRole::Bl)` callers | PARTIAL; independent negative auth tests missing from inspected evidence |
 | US-03 Program CRUD | create, duplicate conflict, read, update, delete, not-found | `program.rs::program_crud` | CODE PRESENT; no verified independent-VTN execution |
 | US-04 Event CRUD | create under program, read, update, delete, not-found | `event.rs::event_crud` | CODE PRESENT; no verified independent-VTN execution |
-| US-05 failure cleanup | all created IDs deleted and independently checked after assertion failure/panic | Tests delete on success only; `EXTERNAL_VTN.md` acknowledges limitation | OPEN / HIGH |
+| US-05 failure cleanup | all created IDs deleted and independently checked after assertion failure/panic | focused CRUD tests now catch unwind, retain created IDs, retry deletion, and surface cleanup errors | IMPLEMENTED; fault-injection and independent-VTN verification still required |
 | US-06 test isolation | concurrent test binaries/runners do not delete each other's objects | UUID names and serial tests; no cross-process lock | PARTIAL |
 | US-07 independent reproduction | target implementation/version, exact commit, redacted logs, command, exits, observed effect | JSON Schema and documentation | CONTRACT PRESENT; actual independent artifact NOT VERIFIED |
-| US-08 claim ceiling | failed tests, non-independent deployment, unverified effect, or residual resources cannot produce strong interoperability claim | JSON Schema v0.4 and new exit-code constraint | IMPROVED; schema regression tests and actual artifact validation still needed |
-| US-09 assurance contract CI | validator tests, profile validation and compiler run on PR | Added `assurance-contracts` job to `.github/workflows/checks.yml` | CODE WIRED; CI run NOT VERIFIED |
+| US-08 claim ceiling | failed tests, non-independent deployment, unverified effect, or residual resources cannot produce strong interoperability claim | JSON Schema v0.4 and new exit-code constraint | CI-VERIFIED CONTRACT; actual independent artifact still needed |
+| US-09 assurance contract CI | validator tests, profile validation and compiler run on PR | Added `assurance-contracts` job to `.github/workflows/checks.yml` | CI VERIFIED; assurance job and repository checks have passed on this branch |
 | US-10 mixed-scope safety | unresolved Gateway status semantics cannot become reportable normative test | validator + compiler readiness gate | CODE PRESENT; runtime CI pending |
 | US-11 official Gateway adoption | native conformance PR reviewed/merged | #4303 draft only, normative blocker; prior write attempts 403 | HOLD; NOT ADOPTED |
 | US-12 A2A adoption | upstream accepted/merged test or externally consumed artifact | No A2A fork or contribution from this branch | NOT STARTED HERE; do not add unrelated code to OpenADR repo |
 | US-13 published identity | independent reviewer can verify contribution via merge, release or report | local commits only | NOT YET |
-| US-14 full Rust regression | fmt, clippy, workspace tests, SQLx and external smoke are green | existing Rust CI workflow; no run evidence in this audit | NOT VERIFIED |
+| US-14 full Rust regression | fmt, clippy, workspace tests, SQLx and external smoke are green | GitHub Actions `Checks` and `Rust docs` succeeded through the failure-cleanup implementation commit `c4f4b7e` | VERIFIED FOR BRANCH; external smoke remains separate |
 | US-15 feature scope honesty | no claim that unsupported webhook/subscription, independent VEN authorization, or all OpenADR cases pass | upstream README and `EXTERNAL_VTN.md` state limitations | DOCUMENTED; runtime coverage still incomplete |
 
 ## Stop-the-line gaps
 
 1. **P0: No verified third-party VTN execution**. A contract, test function, or schema does not establish interoperability.
-2. **P0: No failure-path cleanup**. Panic/assertion failure can leave resources on the external VTN. A disposable dedicated environment is required until cleanup-on-failure is implemented and tested.
-3. **P0: Claim integrity**. Strong evidence claims must fail if any test exits nonzero; added schema constraint, but negative fixture tests are still needed.
-4. **P1: CI trust**. Assurance Python checks were not wired into the inspected existing CI; a job has now been added, but no CI run has been verified.
+2. **P0: Failure cleanup lacks fault-injection proof**. Cleanup-on-unwind is implemented and repository CI passes, but no deliberately injected mid-CRUD failure has yet demonstrated zero residual resources on an independent VTN.
+3. **P0: Claim integrity beyond schema**. Strong-claim schema regressions now run in CI, including failed-test and missing-correlation rejection; a real independent artifact must still exercise the same ceiling.
+4. **P1: CI trust**. Assurance Python checks and repository Rust checks are now verified on branch CI; external-VTN smoke remains intentionally outside ordinary CI until credentials/target are available.
 5. **P1: Role and isolation**. Negative VEN/BL permission cases and cross-run resource isolation are not established by the two focused CRUD tests.
 6. **P1: Provenance**. The upstream OpenLEADR badges, Alliance test screenshot, and sponsor claims describe the upstream project, not proof of this fork's branch.
 7. **P2: Research isolation**. Keep Gateway #4303 as HOLD; avoid growing Gateway/A2A schemas inside the OpenADR production surface.
