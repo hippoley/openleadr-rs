@@ -69,6 +69,16 @@ async fn event_lifecycle_without_local_database() {
         event_cleanup.is_ok() && parent_cleanup.is_ok(),
         "CLEANUP FAILED; program={program_id:?} name={name}; Event={event_cleanup:?}, parent={parent_cleanup:?}, checks={verification:?}"
     );
+    if let Some(id) = &event_id {
+        match client.get_event_by_id(id).await {
+            Err(e) if e.is_not_found() => (),
+            other => panic!("POST-DELETE CHECK FAILED: Event {id:?} unexpectedly observable: {other:?}"),
+        }
+    }
+    match client.get_program_by_id(&program_id).await {
+        Err(e) if e.is_not_found() => (),
+        other => panic!("POST-DELETE CHECK FAILED: Program {program_id:?} unexpectedly observable: {other:?}"),
+    }
     assert!(verification.is_ok(), "Event checks failed: {verification:?}");
     eprintln!("EVENT_CRUD PASS; Event and parent Program removed");
 }
