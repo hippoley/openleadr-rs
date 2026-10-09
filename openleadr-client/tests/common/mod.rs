@@ -254,3 +254,23 @@ pub async fn setup_client_with_role<K: ClientKind>(db: PgPool, role: AuthRole) -
     let app_state = AppState::new(storage, &VtnConfig::from_env()).await;
     MockClientRef::new(app_state.into_router()).into_client(Some(cred))
 }
+
+#[cfg(test)]
+mod fault_injection_tests {
+    use super::should_inject_failure_after_create;
+
+    #[test]
+    fn fault_injection_is_disabled_by_default() {
+        unsafe { std::env::remove_var("OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE") };
+        assert!(!should_inject_failure_after_create());
+    }
+
+    #[test]
+    fn fault_injection_requires_exact_opt_in() {
+        unsafe { std::env::set_var("OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE", "true") };
+        assert!(!should_inject_failure_after_create());
+        unsafe { std::env::set_var("OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE", "1") };
+        assert!(should_inject_failure_after_create());
+        unsafe { std::env::remove_var("OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE") };
+    }
+}
