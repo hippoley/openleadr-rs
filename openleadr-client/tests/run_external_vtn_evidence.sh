@@ -4,6 +4,8 @@ set -u
 : "${OPENLEADR_RS_VTN_URL:?set OPENLEADR_RS_VTN_URL to a disposable independent VTN}"
 : "${OPENLEADR_RS_BL_CLIENT_ID:?set OPENLEADR_RS_BL_CLIENT_ID}"
 : "${OPENLEADR_RS_BL_CLIENT_SECRET:?set OPENLEADR_RS_BL_CLIENT_SECRET}"
+: "${OPENLEADR_RS_VEN_CLIENT_ID:?set OPENLEADR_RS_VEN_CLIENT_ID for the negative authorization probe}"
+: "${OPENLEADR_RS_VEN_CLIENT_SECRET:?set OPENLEADR_RS_VEN_CLIENT_SECRET for the negative authorization probe}"
 
 export OPENLEADR_RS_REQUIRE_EXTERNAL_VTN=1
 OUT_DIR="${1:-external-vtn-evidence}"
@@ -23,6 +25,7 @@ set -e
 echo "# normal CRUD: expected exit 0"
 run_capture program_crud cargo test -p openleadr-client --test program program_crud -- --exact --nocapture
 run_capture event_crud cargo test -p openleadr-client --test event event_crud -- --exact --nocapture
+run_capture ven_role_cannot_create_program cargo test -p openleadr-client --test program ven_role_cannot_create_program -- --exact --nocapture
 
 echo "# deliberate post-create failures: expected nonzero; cleanup must be verified remotely"
 export OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE=1
