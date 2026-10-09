@@ -14,30 +14,18 @@
 use openleadr_client::BusinessLogic;
 use openleadr_wire::program::ProgramRequest;
 use uuid::Uuid;
-use url::Url;
+use serial_test::serial;
 
 mod common;
+#[path = "external_mutation_guard.rs"]
+mod external_mutation_guard;
 
-fn authorized_url() -> Url {
-    assert_eq!(
-        std::env::var("OPENLEADR_RS_ALLOW_MUTATION").as_deref(),
-        Ok("I_UNDERSTAND"),
-        "test NOT RUN: explicit external mutation opt-in required"
-    );
-    let url: Url = std::env::var("OPENLEADR_RS_VTN_URL")
-        .expect("dedicated VTN URL required")
-        .parse()
-        .expect("invalid VTN URL");
-    assert_eq!(url.scheme(), "https", "mutating external test requires HTTPS");
-    assert!(url.username().is_empty() && url.password().is_none());
-    assert!(url.query().is_none() && url.fragment().is_none());
-    url
-}
 
 #[tokio::test]
+#[serial]
 #[ignore = "destructive external VTN test; explicit authorization required"]
 async fn program_create_read_update_delete_without_pgpool() {
-    let client = common::setup_url_client::<BusinessLogic>(authorized_url());
+    let client = common::setup_url_client::<BusinessLogic>(external_mutation_guard::authorized_mutation_url());
     let original_name = format!("openleadr-interoperability-{}", Uuid::new_v4());
     let original = ProgramRequest::new(&original_name);
 
