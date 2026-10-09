@@ -1,6 +1,6 @@
 # Issue #53 interoperability benchmark — v1.0.0
 
-**Status: dataset and scorer committed, NO external VTN execution evidence yet.** This benchmark is based on upstream [Issue #53](https://github.com/OpenLEADR/openleadr-rs/issues/53), not an independent standards certification scheme.
+**Status: in-tree VTN cross-process read-only HTTP/OAuth E2E passed on 2026-10-09; independent third-party VTN and CRUD/fault/cleanup remain NOT VERIFIED.** This benchmark is based on upstream [Issue #53](https://github.com/OpenLEADR/openleadr-rs/issues/53), not an independent standards certification scheme.
 
 ## Design decisions
 - The dataset contains **16 distinct cases** tied to `US53-01` through `US53-07`; gates: local (5), external (5), fault (4), concurrency (2).
@@ -22,7 +22,7 @@ The four `gate` values represent task families, *not* train/validation/test stat
 3. P1: test at least two independent VTN implementations and role combinations with redacted traces.
 4. P2: measure latency distribution, resource cleanup time and failure rates with enough repeated runs for confidence intervals; publish run configuration and raw artifacts.
 
-**Known missing pieces:** no automated per-case driver, no successful real-VTN runs, no cross-implementation equivalence oracle, and no evidence provenance signature. All story gates remain NOT Verified Closed.
+**Known missing pieces:** no automated drivers for most canonical cases, no independent third-party VTN receipts, no cross-implementation equivalence oracle, and no independent signed provenance. **Known completed scope:** real in-tree VTN separate-process read-only Program/Event execution with JUnit and SHA-256 evidence; see `evidence/in_tree_readonly_20261009.json` and its GitHub Actions run. All story gates remain NOT Verified Closed.
 
 ## Cross-manifest integrity audit (2026-10-09)
 
@@ -39,3 +39,9 @@ The real-process `upstream-vtn-e2e.yml` now reuses **cargo-nextest**, the same e
 `verify_junit.py` independently reads the JUnit data; missing, duplicate, failed or skipped Program/Event tests reject the E2E claim. The workflow captures the tested commit SHA, JUnit SHA-256, client/server logs, and a JSON receipt through `actions/upload-artifact`. Python negative-case tests live in `test_verify_junit.py` and run under the preexisting benchmark unittest CI step.
 
 Scope remains intentionally restricted: **two read-only calls against the in-tree VTN running as a separate process**, *not* independent third-party interoperability; no CRUD, mutation, cleanup, fault injection or full certification is claimed. The public GitHub Actions run must finish successfully before even this limited E2E is marked executed/passed. Artifact logs and CI should be reviewed for sensitive values before sharing elsewhere.
+
+### Scope-correct public receipt (2026-10-09)
+
+At head SHA `7e659747723eb78e177fa19c27f855da5f6cc13f`, [Actions Run #37913459997](https://github.com/hippoley/openleadr-rs/actions/runs/37913459997) passed both `external_vtn_can_list_*` tests against an **in-tree VTN server running as its own process**. The report contains two passed JUnit cases, zero missing required cases, with a logged JUnit digest `274eeb657ec23ddb1efba4b797f40f4114f5d5e39e45c19dc39cb31b0a0e3719`; the GitHub-hosted run uploaded artifact `upstream-vtn-readonly-e2e`. The machine-readable index in `evidence/in_tree_readonly_20261009.json` records its limited scope.
+
+**Do not equate this receipt with a third-party implementation, full OpenADR 3.1 conformance, or a passing CRUD/fault/cleanup benchmark.** The canonical 16-case manifest is a requirements dataset; its not-executed entries must not be rewritten to `pass` based on these two additional read-only smoke tests. An actual independent VTN execution and resource lifecycle oracle remain the top gate.
