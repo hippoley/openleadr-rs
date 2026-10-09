@@ -22,6 +22,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067
         with:
           toolchain: stable
+      - name: Validate scenario metadata and false-pass assertions
+        run: python3 benchmarks/issue53/validate.py
       - name: Validate Issue 53 benchmark dataset and scoring contract
         run: |
           python3 benchmarks/issue53/score.py
