@@ -27,9 +27,9 @@ def validate(path: Path) -> list[str]:
     app = data.get("applicability", {})
     if not isinstance(app, dict):
         return [f"{path}: applicability must be an object"]
-    if not app.get("conformance_system"):
+    if not isinstance(app.get("conformance_system"), str) or not app["conformance_system"].strip():
         errors.append(f"{path}: applicability.conformance_system is required")
-    if not app.get("report_visibility_requirement"):
+    if not isinstance(app.get("report_visibility_requirement"), str) or not app["report_visibility_requirement"].strip():
         errors.append(f"{path}: applicability.report_visibility_requirement is required")
 
     surfaces = data.get("evidence_surface")
@@ -43,7 +43,7 @@ def validate(path: Path) -> list[str]:
         missing = REQUIRED_EVIDENCE - item.keys()
         if missing:
             errors.append(f"{path}: evidence_surface[{i}] missing {sorted(missing)}")
-        if not item.get("does_not_establish"):
+        if not isinstance(item.get("does_not_establish"), list) or not item["does_not_establish"] or not all(isinstance(x, str) and x.strip() for x in item["does_not_establish"]):
             errors.append(f"{path}: evidence_surface[{i}] must bound at least one stronger claim")
 
     oracles = data.get("negative_oracles")
@@ -54,7 +54,7 @@ def validate(path: Path) -> list[str]:
         if not isinstance(oracle, dict):
             errors.append(f"{path}: negative_oracles[{i}] must be an object")
             continue
-        if not oracle.get("id"):
+        if not isinstance(oracle.get("id"), str) or not oracle["id"].strip():
             errors.append(f"{path}: negative_oracles[{i}].id is required")
         boundaries = [oracle.get(k) for k in ("must_not_claim", "must_reject") if k in oracle]
         if not boundaries or not any(isinstance(b, list) and b and all(isinstance(x, str) and x.strip() for x in b) for b in boundaries):
@@ -65,7 +65,7 @@ def validate(path: Path) -> list[str]:
         readiness = oracle.get("conformance_readiness", "ready")
         if app.get("profile") == "mixed-scope-not-reportable" and readiness == "ready":
             errors.append(f"{path}: negative_oracles[{i}] mixed-scope profile cannot declare ready normative conformance")
-        if readiness not in ALLOWED_READINESS:
+        if not isinstance(readiness, str) or readiness not in ALLOWED_READINESS:
             errors.append(f"{path}: negative_oracles[{i}] has unknown conformance_readiness {readiness!r}")
         if readiness != "ready":
             if not oracle.get("blocking_decision"):
@@ -82,7 +82,7 @@ def validate(path: Path) -> list[str]:
                 continue
             if not evidence.get("observation"):
                 errors.append(f"{path}: negative_oracles[{i}].implementation_evidence[{j}] needs observation")
-            if not evidence.get("does_not_establish"):
+            if not isinstance(evidence.get("does_not_establish"), str) or not evidence["does_not_establish"].strip():
                 errors.append(f"{path}: negative_oracles[{i}].implementation_evidence[{j}] needs does_not_establish")
 
     return errors
