@@ -20,6 +20,7 @@ jobs:
       OPENLEADR_RS_BL_CLIENT_ID: bl-1
       OPENLEADR_RS_VEN_CLIENT_ID: ven-1
       OPENLEADR_RS_REQUIRE_EXTERNAL_VTN: '1'
+      SQLX_OFFLINE: 'true'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
