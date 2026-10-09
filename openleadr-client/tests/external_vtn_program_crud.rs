@@ -14,7 +14,7 @@
 use openleadr_client::BusinessLogic;
 use openleadr_wire::program::ProgramRequest;
 use uuid::Uuid;
-use serial_test::serial;
+use serial_test::file_serial;
 
 mod common;
 #[path = "external_mutation_guard.rs"]
@@ -22,7 +22,7 @@ mod external_mutation_guard;
 
 
 #[tokio::test]
-#[serial]
+#[file_serial(openleadr_external_vtn)]
 #[ignore = "destructive external VTN test; explicit authorization required"]
 async fn program_create_read_update_delete_without_pgpool() {
     let client = common::setup_url_client::<BusinessLogic>(external_mutation_guard::authorized_mutation_url());
