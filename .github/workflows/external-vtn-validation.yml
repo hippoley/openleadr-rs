@@ -1,0 +1,30 @@
+name: External VTN probe validation
+
+on:
+  push:
+    branches:
+      - feat/external-vtn-readonly-conformance-smoke
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      SQLX_OFFLINE: "true"
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067
+        with:
+          toolchain: stable
+      - name: Compile integration test binaries without a live VTN
+        run: cargo test -p openleadr-client --tests --no-run
+      - name: Run pure guard tests without external mutation
+        run: cargo test -p openleadr-client --test external_mutation_guard
+      - name: Run URL validation tests without contacting a VTN
+        run: cargo test -p openleadr-client --test external_vtn_readonly
