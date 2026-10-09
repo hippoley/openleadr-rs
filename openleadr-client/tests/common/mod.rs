@@ -127,6 +127,10 @@ fn enforce_external_only_guard() {
     }
 }
 
+pub fn should_inject_failure_after_create() -> bool {
+    std::env::var("OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE").as_deref() == Ok("1")
+}
+
 pub struct TestContext<K> {
     pub client: Client<K>,
 }
