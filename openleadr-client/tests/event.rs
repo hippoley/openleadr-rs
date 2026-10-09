@@ -1,4 +1,5 @@
 use axum::http::StatusCode;
+use futures::FutureExt;
 use openleadr_client::{BusinessLogic, Error, Filter, PaginationOptions};
 use openleadr_wire::{
     event::{EventInterval, EventRequest, EventType, EventValuesMap, Priority},
@@ -8,7 +9,7 @@ use openleadr_wire::{
 };
 use serial_test::serial;
 use sqlx::PgPool;
-use std::str::FromStr;
+use std::{panic::AssertUnwindSafe, str::FromStr};
 
 mod common;
 
@@ -37,36 +38,75 @@ fn default_content(program_id: &ProgramId) -> EventRequest {
 #[serial]
 async fn event_crud() {
     let ctx = common::setup::<BusinessLogic>(common::AuthRole::Bl).await;
-    // Avoid touching resources created by another test run on a shared VTN.
     let run_id = uuid::Uuid::new_v4();
     let program_name = format!("event-crud-program-{run_id}");
+    let mut program_id = None;
+    let mut event_id = None;
 
-    let program = ctx
-        .create_program(ProgramRequest::new(program_name))
-        .await
-        .unwrap();
+    let outcome = AssertUnwindSafe(async {
+        let program = ctx
+            .create_program(ProgramRequest::new(program_name))
+            .await
+            .unwrap();
+        program_id = Some(program.id().clone());
 
-    let event_content = EventRequest {
-        event_name: Some(format!("event-crud-test-{run_id}")),
-        ..default_content(program.id())
-    };
-    let created = program.create_event(event_content.clone()).await.unwrap();
-    assert_eq!(created.content(), &event_content);
+        let event_content = EventRequest {
+            event_name: Some(format!("event-crud-test-{run_id}")),
+            ..default_content(program.id())
+        };
+        let created = program.create_event(event_content.clone()).await.unwrap();
+        event_id = Some(created.id().clone());
+        assert_eq!(created.content(), &event_content);
 
-    let mut event = ctx.get_event_by_id(created.id()).await.unwrap();
-    assert_eq!(event.content(), created.content());
+        let mut event = ctx.get_event_by_id(created.id()).await.unwrap();
+        assert_eq!(event.content(), created.content());
 
-    event.content_mut().priority = Priority::MIN;
-    event.update().await.unwrap();
-    let updated = ctx.get_event_by_id(event.id()).await.unwrap();
-    assert_eq!(updated.content().priority, Priority::MIN);
+        event.content_mut().priority = Priority::MIN;
+        event.update().await.unwrap();
+        let updated = ctx.get_event_by_id(event.id()).await.unwrap();
+        assert_eq!(updated.content().priority, Priority::MIN);
 
-    let event_id = event.id().clone();
-    event.delete().await.unwrap();
-    let err = ctx.get_event_by_id(&event_id).await.unwrap_err();
-    assert!(err.is_not_found());
+        event.delete().await.unwrap();
+        program.delete().await.unwrap();
+    })
+    .catch_unwind()
+    .await;
 
-    program.delete().await.unwrap();
+    let mut cleanup_errors = Vec::new();
+    if let Some(id) = event_id {
+        match ctx.get_event_by_id(&id).await {
+            Ok(event) => {
+                if let Err(err) = event.delete().await {
+                    cleanup_errors.push(format!("event {id}: {err}"));
+                }
+            }
+            Err(err) if err.is_not_found() => {}
+            Err(err) => cleanup_errors.push(format!("event lookup {id}: {err}")),
+        }
+    }
+    if let Some(id) = program_id {
+        match ctx.get_program_by_id(&id).await {
+            Ok(program) => {
+                if let Err(err) = program.delete().await {
+                    cleanup_errors.push(format!("program {id}: {err}"));
+                }
+            }
+            Err(err) if err.is_not_found() => {}
+            Err(err) => cleanup_errors.push(format!("program lookup {id}: {err}")),
+        }
+    }
+
+    if let Err(payload) = outcome {
+        for err in &cleanup_errors {
+            eprintln!("cleanup after event_crud failure also failed: {err}");
+        }
+        std::panic::resume_unwind(payload);
+    }
+    assert!(
+        cleanup_errors.is_empty(),
+        "event_crud cleanup failed: {}",
+        cleanup_errors.join("; ")
+    );
 }
 
 #[sqlx::test(fixtures("users"))]
