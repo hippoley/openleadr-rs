@@ -36,3 +36,59 @@ jobs:
         run: cargo test -p openleadr-client --test external_mutation_guard
       - name: Run URL validation tests without contacting a VTN
         run: cargo test -p openleadr-client --test external_vtn_readonly
+
+  real-process-vtn-readonly:
+    name: Real-process VTN read-only E2E (in-tree, NOT third-party)
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      SQLX_OFFLINE: "true"
+      OPENLEADR_RS_VTN_URL: http://127.0.0.1:3000/
+      OPENLEADR_RS_CLIENT_ID: bl-client
+      OPENLEADR_RS_CLIENT_SECRET: bl-client
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067
+        with:
+          toolchain: stable
+      - name: Start isolated backing services
+        run: docker compose up -d db mqtt --wait
+      - name: Install SQLx migration CLI and initialize test credentials
+        run: |
+          cargo install sqlx-cli --locked --version 0.8.6 --no-default-features --features postgres
+          cargo sqlx migrate run --source openleadr-vtn/migrations
+          psql -v ON_ERROR_STOP=1 "$DATABASE_URL" < fixtures/users.sql
+      - name: Start actual in-tree VTN as independent server process
+        run: |
+          cargo run -p openleadr-vtn > "$RUNNER_TEMP/vtn-server.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/vtn-server.pid"
+          for i in $(seq 1 90); do
+            if curl --silent --output /dev/null --connect-timeout 1 http://127.0.0.1:3000/programs; then
+              echo "VTN process reachable"
+              exit 0
+            fi
+            if ! kill -0 "$(cat "$RUNNER_TEMP/vtn-server.pid")" 2>/dev/null; then
+              cat "$RUNNER_TEMP/vtn-server.log"
+              exit 1
+            fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/vtn-server.log"
+          exit 1
+      - name: Run actual client HTTP/OAuth read-only Program and Event requests
+        run: |
+          cargo test -p openleadr-client --test external_vtn_readonly -- --ignored --nocapture 2>&1 | tee "$RUNNER_TEMP/vtn-client.log"
+      - name: Preserve server and client logs even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: in-tree-vtn-e2e-receipt
+          path: |
+            ${{ runner.temp }}/vtn-server.log
+            ${{ runner.temp }}/vtn-client.log
+          if-no-files-found: warn
+      - name: Stop isolated services
+        if: always()
+        run: docker compose down -v
