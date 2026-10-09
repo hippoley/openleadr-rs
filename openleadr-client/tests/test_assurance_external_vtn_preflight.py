@@ -17,7 +17,7 @@ class ExternalVtnPreflightTests(unittest.TestCase):
             if url.endswith("/auth/server"):
                 return {"tokenURL":base+"/auth/token"}
             return {"paths":{"/programs":{"get":{}},"/events":{"get":{}}}}
-        self.assertTrue(preflight(base,fetch)["token_endpoint_discovered"])
+        self.assertTrue(preflight(base,fetch,require_openapi=True)["token_endpoint_discovered"])
 
     def test_rejects_missing_event_contract(self):
         base="https://example.org/openadr3/3.1.0"
@@ -26,7 +26,15 @@ class ExternalVtnPreflightTests(unittest.TestCase):
                 return {"tokenURL":base+"/auth/token"}
             return {"paths":{"/programs":{"get":{}}}}
         with self.assertRaisesRegex(ValueError,"Event collection"):
-            preflight(base,fetch)
+            preflight(base,fetch,require_openapi=True)
+
+    def test_standard_discovery_does_not_require_vendor_openapi(self):
+        base="https://example.org/openadr3/3.1.0"
+        def fetch(url):
+            if url.endswith("/auth/server"):
+                return {"tokenURL":base+"/auth/token"}
+            raise AssertionError("non-normative OpenAPI endpoint must not be fetched")
+        self.assertFalse(preflight(base,fetch)["openapi_checked"])
 
     def test_rejects_https_downgrade(self):
         base="https://example.org/openadr3/3.1.0"
