@@ -533,6 +533,9 @@
                 "properties": {
                   "process_label": {
                     "const": "runner-a"
+                  },
+                  "exit_code": {
+                    "const": 0
                   }
                 }
               },
@@ -540,6 +543,9 @@
                 "properties": {
                   "process_label": {
                     "const": "runner-b"
+                  },
+                  "exit_code": {
+                    "const": 0
                   }
                 }
               }
@@ -569,7 +575,7 @@
           "minLength": 1
         },
         "exit_code": {
-          "const": 0
+          "type": "integer"
         },
         "log_sha256": {
           "type": "string",
