@@ -1,7 +1,9 @@
 use async_trait::async_trait;
 use axum::body::Body;
 use http_body_util::BodyExt;
-use openleadr_client::{Client, ClientCredentials, ClientKind, HttpClient, ProgramClient, TokenEndpointAuthMethod};
+use openleadr_client::{
+    Client, ClientCredentials, ClientKind, HttpClient, ProgramClient, TokenEndpointAuthMethod,
+};
 use openleadr_vtn::{VtnConfig, data_source::PostgresStorage, state::AppState};
 use openleadr_wire::program::ProgramRequest;
 use reqwest::{Method, RequestBuilder, Response};
@@ -64,8 +66,7 @@ fn external_vtn_credentials(auth_role: AuthRole) -> ClientCredentials {
     };
     let legacy_id = credential_env("OPENLEADR_RS_CLIENT_ID");
     let legacy_secret = credential_env("OPENLEADR_RS_CLIENT_SECRET");
-    let strict_external =
-        std::env::var("OPENLEADR_RS_REQUIRE_EXTERNAL_VTN").as_deref() == Ok("1");
+    let strict_external = std::env::var("OPENLEADR_RS_REQUIRE_EXTERNAL_VTN").as_deref() == Ok("1");
     let client_id = credential_env(id_var).or(legacy_id);
     let client_secret = credential_env(secret_var).or(legacy_secret);
 
@@ -233,7 +234,8 @@ pub fn setup_url_client<K: ClientKind>(url: Url) -> Client<K> {
 pub fn setup_url_client_with_role<K: ClientKind>(url: Url, role: AuthRole) -> Client<K> {
     let mut credentials = external_vtn_credentials(role);
     if std::env::var("OPENLEADR_RS_TOKEN_AUTH_METHOD").as_deref() == Ok("client_secret_post") {
-        credentials = credentials.with_token_endpoint_auth_method(TokenEndpointAuthMethod::ClientSecretPost);
+        credentials =
+            credentials.with_token_endpoint_auth_method(TokenEndpointAuthMethod::ClientSecretPost);
     }
     Client::with_url(url, Some(credentials))
 }
