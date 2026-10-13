@@ -570,6 +570,11 @@ impl<K: ClientKind> Client<K> {
         }
     }
 
+    /// Return the normalized VTN deployment root used for resource URL resolution.
+    pub fn base_url(&self) -> &Url {
+        &self.client_ref.vtn_base_url
+    }
+
     /// Create a new program on the VTN.
     pub async fn create_program(
         &self,
