@@ -8,6 +8,18 @@ use std::{panic::AssertUnwindSafe, str::FromStr};
 
 mod common;
 
+#[test]
+fn versioned_vtn_base_url_keeps_directory_semantics() {
+    let client = openleadr_client::Client::<BusinessLogic>::with_url(
+        "http://127.0.0.1:3000/openadr3/3.1.0".parse().unwrap(),
+        None,
+    );
+    assert_eq!(
+        client.base_url().as_str(),
+        "http://127.0.0.1:3000/openadr3/3.1.0/"
+    );
+}
+
 fn default_content() -> ProgramRequest {
     ProgramRequest {
         program_name: "program_name".to_string(),
