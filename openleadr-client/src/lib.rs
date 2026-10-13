@@ -148,7 +148,10 @@ impl Debug for ClientCredentials {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct(std::any::type_name::<Self>())
             .field("client_id", &self.client_id)
-            .field("token_endpoint_auth_method", &self.token_endpoint_auth_method)
+.field(
+                "token_endpoint_auth_method",
+                &self.token_endpoint_auth_method,
+            )
             .field("refresh_margin", &self.refresh_margin)
             .field(
                 "default_credential_expires_in",
@@ -250,7 +253,8 @@ impl<K: ClientKind> ClientRef<K> {
         }
 
         // we should authenticate
-        let post_auth = auth_data.token_endpoint_auth_method == TokenEndpointAuthMethod::ClientSecretPost;
+        let post_auth =
+            auth_data.token_endpoint_auth_method == TokenEndpointAuthMethod::ClientSecretPost;
         let request = self
             .client
             .request_builder(Method::POST, self.oauth_base_url.clone())
@@ -539,6 +543,15 @@ impl<K: ClientKind> Client<K> {
         client: Box<dyn HttpClient + Send + Sync>,
         auth: Option<ClientCredentials>,
     ) -> Self {
+        // url::Url::join treats a base path without a trailing slash as a file.
+        // OpenADR deployment roots such as /openadr3/3.1.0 therefore need directory
+        // semantics, otherwise joining "programs" silently drops the version segment.
+        let mut vtn_base_url = vtn_base_url;
+        if !vtn_base_url.path().ends_with('/') {
+            let normalized_path = format!("{}/", vtn_base_url.path());
+            vtn_base_url.set_path(&normalized_path);
+        }
+
         let client_ref = ClientRef {
             client,
             vtn_base_url,
