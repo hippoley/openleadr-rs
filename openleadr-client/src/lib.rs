@@ -148,7 +148,7 @@ impl Debug for ClientCredentials {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct(std::any::type_name::<Self>())
             .field("client_id", &self.client_id)
-.field(
+            .field(
                 "token_endpoint_auth_method",
                 &self.token_endpoint_auth_method,
             )
