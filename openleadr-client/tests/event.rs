@@ -3,6 +3,7 @@ use futures::FutureExt;
 use openleadr_client::{BusinessLogic, Error, Filter, PaginationOptions};
 use openleadr_wire::{
     event::{EventInterval, EventRequest, EventType, EventValuesMap, Priority},
+    interval::IntervalPeriod,
     program::{ProgramId, ProgramRequest},
     target::Target,
     values_map::Value,
@@ -50,8 +51,11 @@ async fn event_crud() {
             .unwrap();
         program_id = Some(program.id().clone());
 
+        // A real VTN must be able to resolve the first interval's start.
+        // Keep the legacy fixture unchanged for in-tree storage tests.
         let event_content = EventRequest {
             event_name: Some(format!("event-crud-test-{run_id}")),
+            interval_period: Some(IntervalPeriod::new(chrono::Utc::now())),
             ..default_content(program.id())
         };
         let created = program.create_event(event_content.clone()).await.unwrap();
