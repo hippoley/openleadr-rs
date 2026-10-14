@@ -1,0 +1,96 @@
+{
+  "schema_version": "0.9.1",
+  "source_commit": "0000000000000000000000000000000000000000",
+  "vtn": {
+    "implementation": "REPLACE_WITH_VTN_IMPLEMENTATION",
+    "version": "REPLACE_WITH_VTN_VERSION",
+    "deployment": "unknown"
+  },
+  "runner": {
+    "rust_version": "REPLACE_WITH_RUST_VERSION",
+    "os": "REPLACE_WITH_RUNNER_OS",
+    "ci_run_url": null
+  },
+  "tests": [
+    {
+      "name": "program_crud",
+      "command": "cargo test -p openleadr-client --test program program_crud -- --exact --nocapture",
+      "exit_code": -1,
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "event_crud",
+      "command": "cargo test -p openleadr-client --test event event_crud -- --exact --nocapture",
+      "exit_code": -1,
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "ven_role_cannot_create_program",
+      "command": "cargo test -p openleadr-client --test program ven_role_cannot_create_program -- --exact --nocapture",
+      "exit_code": -1,
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "concurrent_program_runs_do_not_cross_delete",
+      "command": "cargo test -p openleadr-client --test program concurrent_program_runs_do_not_cross_delete -- --exact --nocapture",
+      "exit_code": -1,
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "cleanup": {
+    "verified": false,
+    "remaining_resources": 0,
+    "notes": "Template only. Set verified=true only after checking the target VTN."
+  },
+  "claim": "effect-observed",
+  "effect_verification": [
+    {
+      "operation": "program.create",
+      "resource_type": "program",
+      "resource_id": "REPLACE_WITH_RESOURCE_ID",
+      "observation": "read-after-write",
+      "verified": true,
+      "verdict": "matched",
+      "before_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "after_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notes": "Counterexample template: an external read-back can match while attribution remains unestablished. This must not be promoted to independent-vtn-crud.",
+      "attribution": "unattributed",
+      "pre_action_observation": false,
+      "operation_correlation": null
+    }
+  ],
+  "fault_injection": [
+    {
+      "name": "program_post_create_panic",
+      "command": "OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE=1 cargo test -p openleadr-client --test program program_crud -- --exact --nocapture",
+      "expected_nonzero_exit": true,
+      "observed_exit_code": -1,
+      "cleanup_verified": false,
+      "remaining_resources": 0,
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "event_post_create_panic",
+      "command": "OPENLEADR_RS_INJECT_FAILURE_AFTER_CREATE=1 cargo test -p openleadr-client --test event event_crud -- --exact --nocapture",
+      "expected_nonzero_exit": true,
+      "observed_exit_code": -1,
+      "cleanup_verified": false,
+      "remaining_resources": 0,
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "parallel_isolation": {
+    "runner_a": {
+      "process_label": "runner-a",
+      "command": "bash openleadr-client/tests/run_external_vtn_parallel_isolation.sh",
+      "exit_code": -1,
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "runner_b": {
+      "process_label": "runner-b",
+      "command": "bash openleadr-client/tests/run_external_vtn_parallel_isolation.sh",
+      "exit_code": -1,
+      "log_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
+}

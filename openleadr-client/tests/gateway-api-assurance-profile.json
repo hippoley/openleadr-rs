@@ -1,0 +1,201 @@
+{
+  "profile_version": "0.1.0",
+  "purpose": "Describe protocol-native evidence boundaries and derive implementation-neutral negative conformance oracles.",
+  "protocol": {
+    "name": "Kubernetes Gateway API",
+    "surface": "HTTPRoute status and dataplane behavior"
+  },
+  "evidence_surface": [
+    {
+      "id": "accepted-condition",
+      "observation": "HTTPRoute parent status reports Accepted=True for the current observedGeneration",
+      "supports": "route-accepted-for-processing",
+      "does_not_establish": [
+        "route-programmed-in-dataplane",
+        "traffic-reaches-this-route"
+      ]
+    },
+    {
+      "id": "programmed-condition",
+      "observation": "implementation reports a current Programmed condition for the route/parent",
+      "supports": "controller-reported-programming-state",
+      "does_not_establish": [
+        "end-to-end-traffic-outcome"
+      ]
+    },
+    {
+      "id": "dataplane-probe",
+      "observation": "request traffic resolves to the route's backend",
+      "supports": "route-effective-for-probed-traffic",
+      "does_not_establish": [
+        "all-traffic-outcomes"
+      ]
+    }
+  ],
+  "negative_oracles": [
+    {
+      "id": "deterministic-conflict-indistinguishable-success",
+      "source": "kubernetes-sigs/gateway-api#4303",
+      "given": [
+        "two conflict-equivalent HTTPRoutes share one listener",
+        "protocol precedence yields one deterministic winner",
+        "dataplane probe reaches only the winner"
+      ],
+      "must_observe": [
+        "losing route exposes a machine-detectable non-success state for that parent"
+      ],
+      "must_reject": [
+        "winner and loser remain indistinguishable as successful after status convergence"
+      ],
+      "protocol_decision_left_open": "The oracle does not prescribe whether the losing state is Accepted=False, Programmed=False, or another standardized conflict condition.",
+      "conformance_readiness": "spec-decision-required",
+      "blocking_decision": "Gateway API must standardize which Route status condition/reason distinguishes the deterministic loser before a normative conformance test can assert that vocabulary.",
+      "ready_invariant": "The deterministic loser must not remain indistinguishable from the winner as successfully effective for the same parent after status convergence and dataplane verification.",
+      "implementation_evidence": [
+        {
+          "implementation": "kgateway",
+          "evidence_type": "non-normative-status-semantics",
+          "observation": "A current kgateway release moves Route conflicts, dropped routes, and replaced routes to kgateway.dev/Programmed while keeping Accepted scoped to semantic validity.",
+          "supports_candidate": "Accepted remains semantic-validity evidence while Programmed carries dataplane/programming outcome.",
+          "does_not_establish": "Gateway API normative consensus for HTTPRoute conflict status."
+        }
+      ],
+      "adoption_target": {
+        "repository": "kubernetes-sigs/gateway-api",
+        "issue": "4303",
+        "integration_point": "native conformance test for the exact deterministic-conflict subset",
+        "native_harness_evidence": [
+          "conformance/tests/httproute-matching.go uses ConformanceTest, GatewayAndHTTPRoutesMustBeAccepted, condition helpers, and live HTTP probes",
+          "conformance/tests/httproute-exact-path-matching.go demonstrates exact-path traffic assertions",
+          "conformance/tests/httproute-observed-generation-bump.go demonstrates current observedGeneration assertions"
+        ],
+        "proposed_contract": [
+          "create two conflict-equivalent HTTPRoutes whose precedence is deterministic",
+          "wait for current observedGeneration on both routes",
+          "assert the winner is accepted",
+          "assert the deterministic loser has the normative non-success condition once #4303 settles its vocabulary",
+          "probe traffic and verify only the winner backend is effective",
+          "delete the winner and verify the former loser can become effective"
+        ],
+        "scope_boundary": "Exclude partial rule/header/query conflicts; they have harder merge semantics and are not required to prove the exact-conflict gap.",
+        "externalization_status": "blocked-by-github-integration-403"
+      }
+    },
+    {
+      "id": "rejected-but-effective",
+      "source": "cilium/cilium#46917",
+      "given": [
+        "protocol status reports the affected listener as Accepted=False",
+        "protocol status reports the affected listener as Programmed=False"
+      ],
+      "must_observe": [
+        "dataplane probe confirms the rejected listener is not actually serving traffic"
+      ],
+      "must_reject": [
+        "status-only conformance success when the dataplane still serves traffic for the rejected listener"
+      ],
+      "reason": "A controller-reported rejection/programming state is not sufficient evidence of dataplane effect when the implementation can still program and serve the rejected configuration.",
+      "conformance_readiness": "implementation-regression-only",
+      "implementation_evidence": [
+        {
+          "implementation": "Cilium",
+          "evidence_type": "status-effect-contradiction",
+          "observation": "Cilium issue #46917 reports ProtocolConflict listeners marked Accepted=False and Programmed=False while Envoy is still programmed and serves traffic on the conflicted port.",
+          "supports_candidate": "Conformance checks for externally effective routing/listener behavior may require status plus dataplane observation rather than status alone.",
+          "does_not_establish": "That every Gateway API status condition requires a dataplane probe, or that the reported Cilium behavior is normative."
+        }
+      ],
+      "adoption_target": {
+        "repository": "howardjohn/gateway-api-bench",
+        "integration_point": "cross-implementation status-plus-dataplane benchmark",
+        "rationale": "The project explicitly tests real Gateway API behavior beyond official conformance and has already triggered implementation follow-up work; this oracle matches its existing status-plus-traffic testing model.",
+        "proposed_contract": [
+          "create a deterministic listener protocol conflict",
+          "wait for current-generation rejected/not-programmed status",
+          "probe rejected listener paths at the dataplane",
+          "fail if a rejected listener remains externally effective"
+        ],
+        "externalization_status": "blocked-by-github-integration-403"
+      },
+      "blocking_decision": "This implementation-specific witness has not been mapped to a normative Gateway API conformance profile and feature set; do not generate a normative conformance test.",
+      "ready_invariant": "A listener rejected for protocol conflict must not remain effective in the dataplane after convergence."
+    },
+    {
+      "id": "programmed-but-ineffective",
+      "source": "kgateway-dev/kgateway#14453",
+      "given": [
+        "listener status reports Accepted=True",
+        "listener status reports Programmed=True"
+      ],
+      "must_observe": [
+        "dataplane probe confirms a newly programmed listener actually accepts traffic"
+      ],
+      "must_reject": [
+        "status-only success when the dataplane rejected the listener configuration or the listener remains unreachable"
+      ],
+      "reason": "Controller-reported Programmed=True is not sufficient evidence of dataplane effect when Envoy can NACK the generated listener.",
+      "conformance_readiness": "implementation-regression-only",
+      "implementation_evidence": [
+        {
+          "implementation": "kgateway",
+          "evidence_type": "status-effect-contradiction",
+          "observation": "kgateway issue #14453 reports Accepted=True and Programmed=True while Envoy NACKs a fresh listener and the port remains unreachable; an existing listener can continue serving last-known-good configuration.",
+          "supports_candidate": "Externally effective programming claims should be checked against dataplane observation when downstream xDS rejection can diverge from Kubernetes status.",
+          "does_not_establish": "That every Programmed=True condition requires an end-to-end traffic probe, or that kgateway's extension validation semantics are Gateway API normative behavior."
+        }
+      ],
+      "adoption_target": {
+        "repository": "howardjohn/gateway-api-bench",
+        "integration_point": "cross-implementation status-plus-dataplane contradiction benchmark",
+        "rationale": "The benchmark already measures route readiness with live traffic and documents status/dataplane divergence across implementations.",
+        "proposed_contract": [
+          "create a listener/configuration expected to be reported programmed",
+          "wait for current-generation Accepted=True and Programmed=True",
+          "probe the listener at the dataplane",
+          "fail if the listener remains unreachable or only stale last-known-good behavior is effective"
+        ],
+        "externalization_status": "not-yet-attempted"
+      },
+      "blocking_decision": "This implementation-specific witness has not been mapped to a normative Gateway API conformance profile and feature set; do not generate a normative conformance test.",
+      "ready_invariant": "A listener claimed successfully programmed must not silently remain absent after Envoy rejects its configuration; implementation-specific extension semantics must be respected."
+    }
+  ],
+  "applicability": {
+    "conformance_system": "Kubernetes Gateway API",
+    "profile": "mixed-scope-not-reportable",
+    "feature_scope": [
+      "HTTPRoute deterministic precedence conflict (normative status semantics unresolved)",
+      "Gateway listener status versus effective dataplane behavior (implementation regression candidates; TLSRoute applicability requires separate profile mapping)"
+    ],
+    "report_visibility_requirement": "Do not publish this mixed-scope research profile as GATEWAY-HTTP conformance. Resolve each oracle to its own declared Gateway API profile and features, and verify report visibility, before normative generation."
+  },
+  "adoption_gate": {
+    "metric": "external-oracle-adoption",
+    "current_value": 0,
+    "counts_as_adoption": [
+      "an external project incorporates the oracle as a regression test",
+      "an external architecture/design adopts the oracle as an explicit invariant",
+      "a standards or conformance suite incorporates the oracle as a required check"
+    ],
+    "does_not_count": [
+      "a similar bug exists",
+      "an implementation independently exhibits the contradiction",
+      "a local profile or compiler encodes the oracle",
+      "an upstream comment was attempted but not posted"
+    ]
+  },
+  "external_convergence": [
+    {
+      "source": "cilium/cilium#46917",
+      "type": "consumer-impact",
+      "observation": "A downstream user reported that status said Accepted=False while the datapath still worked; a Gateway controller gated on the status, causing Helm upgrade timeout and rollback.",
+      "implication": "Status/effect contradictions can cause other automation to make incorrect operational decisions."
+    },
+    {
+      "source": "cilium/cilium#46681",
+      "type": "architecture-convergence",
+      "observation": "Cilium's Graph-Driven Validation proposal identifies duplicated validation and translation logic as a source of drift where a route can be rejected in status but still ingested into the data plane; it proposes one validation graph whose pruned copy drives translation.",
+      "implication": "The implementation community is independently addressing the same consistency property at architecture level, not only as isolated bug fixes."
+    }
+  ]
+}

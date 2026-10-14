@@ -10,6 +10,33 @@ on:
       - main
 
 jobs:
+  assurance-contracts:
+    name: Validate assurance contracts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Install schema test dependency
+        run: python3 -m pip install 'jsonschema>=4.20,<5'
+      - name: Run assurance unit tests
+        run: python3 -m unittest discover -s openleadr-client/tests -p 'test_assurance*.py' -v
+      - name: Validate assurance profiles
+        run: python3 openleadr-client/tests/validate_assurance_profiles.py
+      - name: Validate horizontal story closure
+        run: python3 openleadr-client/tests/validate_user_story_matrix.py
+      - name: Syntax-check external VTN evidence runner
+        run: |
+          bash -n openleadr-client/tests/run_external_vtn_evidence.sh
+          bash -n openleadr-client/tests/run_external_vtn_parallel_isolation.sh
+      - name: Compile assurance probe plans
+        run: |
+          python3 openleadr-client/tests/compile_assurance_probes.py \
+            openleadr-client/tests/protocol-assurance-profile.json \
+            openleadr-client/tests/gateway-api-assurance-profile.json > /tmp/assurance-probes.json
+          python3 -m json.tool /tmp/assurance-probes.json > /dev/null
+
   build:
     name: Build and test
     runs-on: "${{ matrix.os }}"
