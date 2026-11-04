@@ -1,0 +1,72 @@
+name: Isolated Program HTTP lifecycle (Issue 53)
+
+on:
+  push:
+    branches:
+      - test/api-only-program-smoke-20261104
+    paths:
+      - ".github/workflows/program-http-integration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  program-lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: openadr
+          POSTGRES_PASSWORD: openadr_ci_only
+          POSTGRES_DB: openadr
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U openadr -d openadr"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      DATABASE_URL: postgres://openadr:openadr_ci_only@127.0.0.1:5432/openadr
+      OPENLEADR_RS_VTN_URL: http://127.0.0.1:3000
+      OPENLEADR_RS_CLIENT_ID: bl-client
+      OPENLEADR_RS_CLIENT_SECRET: bl-client
+      OAUTH_TOKEN_URL: http://127.0.0.1:3000/auth/token
+      OAUTH_BASE64_SECRET: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      SQLX_OFFLINE: "true"
+      RUST_LOG: info
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libpq-dev pkg-config libssl-dev clang libclang-dev cmake postgresql-client
+      - name: Compile the test and local VTN
+        run: |
+          cargo test -p openleadr-client --test program_api_only --no-run
+          cargo build -p openleadr-vtn --features internal-oauth --bin openleadr-vtn
+      - name: Start disposable VTN with its own test database
+        run: |
+          ./target/debug/openleadr-vtn > "${RUNNER_TEMP}/vtn.log" 2>&1 &
+          echo $! > "${RUNNER_TEMP}/vtn.pid"
+          for attempt in $(seq 1 60); do
+            if (echo > /dev/tcp/127.0.0.1/3000) >/dev/null 2>&1; then exit 0; fi
+            if ! kill -0 "$(cat "${RUNNER_TEMP}/vtn.pid")" 2>/dev/null; then
+              cat "${RUNNER_TEMP}/vtn.log"; exit 1
+            fi
+            sleep 2
+          done
+          cat "${RUNNER_TEMP}/vtn.log"
+          exit 1
+      - name: Load test-only API credentials after VTN migration
+        run: psql -v ON_ERROR_STOP=1 "$DATABASE_URL" -f fixtures/users.sql
+      - name: Execute Program create/read/delete and assert deletion
+        run: cargo test -p openleadr-client --test program_api_only -- --ignored --nocapture
+      - name: Stop disposable VTN
+        if: always()
+        run: |
+          if test -f "${RUNNER_TEMP}/vtn.pid"; then kill "$(cat "${RUNNER_TEMP}/vtn.pid")" 2>/dev/null || true; fi
