@@ -42,10 +42,18 @@ async fn program_create_read_delete_over_http() {
         .expect("failed to create Program through HTTP");
 
     // Always attempt API cleanup after creation, even when retrieval fails.
-    let retrieved = client.get_program_by_id(created.id()).await;
+    let id = created.id().clone();
+    let retrieved = client.get_program_by_id(&id).await;
     let cleanup = created.delete().await;
+
+    // Check cleanup first, so a failed read does not conceal a failed delete.
+    cleanup.expect("failed to delete test Program through HTTP");
+    let missing = client.get_program_by_id(&id).await;
+    assert!(
+        matches!(missing, Err(ref error) if error.is_not_found()),
+        "deleted Program still exists or could not be checked: {missing:?}"
+    );
 
     let retrieved = retrieved.expect("failed to retrieve Program through HTTP");
     assert_eq!(retrieved.content(), &expected);
-    cleanup.expect("failed to delete test Program through HTTP");
 }
