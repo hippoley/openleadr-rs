@@ -1,0 +1,30 @@
+name: API-only Program compile (Issue 53)
+
+on:
+  push:
+    branches:
+      - test/api-only-program-smoke-20261104
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile-api-only-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      SQLX_OFFLINE: "true"
+    steps:
+      - name: Checkout isolated development branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install system build dependencies
+        run: sudo apt-get update && sudo apt-get install -y pkg-config libssl-dev clang libclang-dev cmake
+      - name: Compile ignored API-only test without running or contacting a VTN
+        run: cargo test -p openleadr-client --test program_api_only --no-run
+      - name: Confirm test is ignored by default
+        run: cargo test -p openleadr-client --test program_api_only -- --list
