@@ -68,7 +68,9 @@ impl Timeline {
     ///
     /// There must be an [`IntervalPeriod`] present on the event level,
     /// or the individual intervals.
-    /// If both are specified, the individual period takes precedence over the one specified in the event.
+    /// If both are specified, interval-level fields override the corresponding event-level
+    /// defaults; omitted duration and randomizeStart fields retain event defaults.
+    /// Parsing an interval period with no start is handled separately (see #531).
     /// If for an interval, there is no period present, and none specified in the event,
     /// then this function will return [`None`]
     pub fn from_events(program: &Program, mut events: Vec<&EventRequest>) -> Option<Self> {
@@ -88,24 +90,20 @@ impl Timeline {
 
             if let Some(event_intervals) = &event.intervals {
                 for event_interval in event_intervals {
-                    // use the event interval period when the interval doesn't specify one
-                    let (start, duration, randomize_start) =
-                        match event_interval.interval_period.as_ref() {
-                            Some(IntervalPeriod {
-                                start,
-                                duration,
-                                randomize_start,
-                            }) => (start, duration, randomize_start),
-                            None => (
-                                &current_start?,
-                                &default_period?.duration,
-                                &default_period?.randomize_start,
-                            ),
-                        };
+                    // Each interval-level field overrides only its event-level default.
+                    // An omitted interval period continues from the previous interval's end.
+                    let period = event_interval.interval_period.as_ref();
+                    let start = period.map(|p| p.start).or(current_start)?;
+                    let duration = period
+                        .and_then(|p| p.duration.as_ref())
+                        .or_else(|| default_period.and_then(|p| p.duration.as_ref()));
+                    let randomize_start = period
+                        .and_then(|p| p.randomize_start.as_ref())
+                        .or_else(|| default_period.and_then(|p| p.randomize_start.as_ref()));
 
                     let range = match duration {
-                        Some(duration) => *start..*start + duration.to_chrono_at_datetime(*start),
-                        None => *start..DateTime::<Utc>::MAX_UTC,
+                        Some(duration) => start..start + duration.to_chrono_at_datetime(start),
+                        None => start..DateTime::<Utc>::MAX_UTC,
                     };
 
                     current_start = Some(range.end);
@@ -113,8 +111,7 @@ impl Timeline {
                     let interval = InternalInterval {
                         id: id as u32,
                         randomize_start: randomize_start
-                            .as_ref()
-                            .map(|d| d.to_chrono_at_datetime(*start)),
+                            .map(|d| d.to_chrono_at_datetime(start)),
                         value_map: event_interval.payloads.clone(),
                         priority: event.priority,
                     };
@@ -446,6 +443,54 @@ mod test {
             interval.1.value_map[0].value_type,
             openleadr_wire::event::EventType::Simple
         );
+    }
+
+    #[test]
+    fn interval_period_inherits_event_duration_and_randomization() {
+        let program = test_program("p");
+        let start = DateTime::UNIX_EPOCH;
+        let payloads = vec![EventValuesMap {
+            value_type: openleadr_wire::event::EventType::Price,
+            values: vec![Value::Number(1.0)],
+        }];
+
+        let event = EventRequest::new(program.id.clone())
+            .with_interval_period(IntervalPeriod {
+                start,
+                duration: Some(openleadr_wire::Duration::hours(2.0)),
+                randomize_start: Some(openleadr_wire::Duration::minutes(10.0)),
+            })
+            .with_intervals(vec![
+                EventInterval {
+                    id: 0,
+                    interval_period: Some(IntervalPeriod {
+                        start,
+                        duration: None,
+                        randomize_start: None,
+                    }),
+                    payloads: payloads.clone(),
+                },
+                EventInterval {
+                    id: 1,
+                    interval_period: Some(IntervalPeriod {
+                        start: start + Duration::hours(2),
+                        duration: Some(openleadr_wire::Duration::hours(1.0)),
+                        randomize_start: Some(openleadr_wire::Duration::minutes(5.0)),
+                    }),
+                    payloads,
+                },
+            ]);
+
+        let timeline = Timeline::from_events(&program, vec![&event]).unwrap();
+        let (first_range, first) = timeline.at_datetime(&(start + Duration::minutes(30))).unwrap();
+        assert_eq!(first_range.start, start);
+        assert_eq!(first_range.end, start + Duration::hours(2));
+        assert_eq!(first.randomize_start(), Some(Duration::minutes(10)));
+
+        let (second_range, second) = timeline.at_datetime(&(start + Duration::hours(2))).unwrap();
+        assert_eq!(second_range.end, start + Duration::hours(3));
+        assert_eq!(second.randomize_start(), Some(Duration::minutes(5)));
+        assert!(timeline.at_datetime(&(start + Duration::hours(3))).is_none());
     }
 
     #[test]
