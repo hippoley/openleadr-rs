@@ -458,7 +458,7 @@ mod test {
             .with_interval_period(IntervalPeriod {
                 start,
                 duration: Some(openleadr_wire::Duration::hours(2.0)),
-                randomize_start: Some(openleadr_wire::Duration::minutes(10.0)),
+                randomize_start: Some("PT10M".parse().unwrap()),
             })
             .with_intervals(vec![
                 EventInterval {
@@ -475,7 +475,7 @@ mod test {
                     interval_period: Some(IntervalPeriod {
                         start: start + Duration::hours(2),
                         duration: Some(openleadr_wire::Duration::hours(1.0)),
-                        randomize_start: Some(openleadr_wire::Duration::minutes(5.0)),
+                        randomize_start: Some("PT5M".parse().unwrap()),
                     }),
                     payloads,
                 },
